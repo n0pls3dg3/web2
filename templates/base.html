@@ -334,10 +334,18 @@
                     <!-- Messages will be loaded here dynamically -->
                 </div>
                 <div class="p-3 border-t border-stone-200/50 bg-white/20 flex gap-2 items-center">
+                    <input type="file" id="chat-file-input" accept="image/*" class="hidden">
+                    <button id="chat-attach-btn" type="button" class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-white/60 hover:bg-white/90 text-stone-600 rounded-xl border border-white/50 transition-colors shadow-sm animate-fade-in" title="Đính kèm hình ảnh"><i class="fa-solid fa-camera text-xs"></i></button>
                     <input type="text" id="live-chat-input" placeholder="Nhập tin nhắn..." class="flex-grow text-xs px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-1 focus:ring-red-800 bg-white/50">
-                    <button id="live-chat-send" class="w-9 h-9 flex items-center justify-center bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md transition-colors"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                    <button id="live-chat-send" class="w-9 h-9 flex-shrink-0 flex items-center justify-center bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md transition-colors"><i class="fa-solid fa-paper-plane text-xs"></i></button>
                 </div>
             </div>
+        </div>
+
+        <!-- Lightbox Modal for Chat Image Preview -->
+        <div id="chat-lightbox" class="fixed inset-0 z-[2000] bg-black/90 backdrop-blur-sm hidden flex-col items-center justify-center p-4">
+            <button id="chat-lightbox-close" class="absolute top-4 right-4 text-white/70 hover:text-white text-4xl font-light transition-colors leading-none">&times;</button>
+            <img id="chat-lightbox-img" src="" alt="preview" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain">
         </div>
 
         <!-- Floating Toggle Button -->
@@ -369,6 +377,8 @@
             
             const chatInput = document.getElementById('live-chat-input');
             const chatSendBtn = document.getElementById('live-chat-send');
+            const chatAttachBtn = document.getElementById('chat-attach-btn');
+            const chatFileInput = document.getElementById('chat-file-input');
             
             let pollInterval = null;
             let lastMessageCount = -1;
@@ -465,6 +475,82 @@
                 }
             }
             
+            // File Attachment Handlers
+            chatAttachBtn.addEventListener('click', () => {
+                chatFileInput.click();
+            });
+            
+            chatFileInput.addEventListener('change', () => {
+                if (chatFileInput.files.length > 0) {
+                    uploadChatImage(chatFileInput.files[0]);
+                    chatFileInput.value = '';
+                }
+            });
+            
+            // Paste Handler (Clipboard paste images)
+            chatInput.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let item of items) {
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        uploadChatImage(blob);
+                    }
+                }
+            });
+            
+            // Drag and Drop Handlers
+            chatFeed.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                chatFeed.classList.add('bg-red-500/5');
+            });
+            chatFeed.addEventListener('dragleave', () => {
+                chatFeed.classList.remove('bg-red-500/5');
+            });
+            chatFeed.addEventListener('drop', (e) => {
+                e.preventDefault();
+                chatFeed.classList.remove('bg-red-500/5');
+                if (e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        uploadChatImage(file);
+                    }
+                }
+            });
+            
+            async function uploadChatImage(file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("Kích thước hình ảnh quá lớn (Tối đa 5MB)!");
+                    return;
+                }
+                
+                const loadingMsg = document.createElement('div');
+                loadingMsg.className = 'chat-msg chat-msg-customer opacity-60 self-end';
+                loadingMsg.innerHTML = `<div class="flex items-center gap-2 text-2xs font-semibold"><i class="fa-solid fa-spinner animate-spin"></i> Đang tải ảnh...</div>`;
+                chatFeed.appendChild(loadingMsg);
+                chatFeed.scrollTop = chatFeed.scrollHeight;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    const res = await fetch('/api/chat/send', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        loadMessages();
+                    } else {
+                        alert(data.message || "Không thể gửi ảnh.");
+                        loadingMsg.remove();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Lỗi kết nối mạng.");
+                    loadingMsg.remove();
+                }
+            }
+
             chatSendBtn.addEventListener('click', sendMessage);
             chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendMessage();
@@ -505,12 +591,39 @@
                         }
                     }
                     
-                    msgDiv.innerHTML = `
-                        <div class="font-semibold text-[11px] opacity-75 mb-0.5">${escapeHTML(msg.sender_name)}</div>
-                        <div class="text-[12px] whitespace-pre-wrap">${escapeHTML(msg.message)}</div>
-                        <span class="chat-msg-time text-right">${timeStr}</span>
-                    `;
+                    let msgContent = '';
+                    if (msg.message_type === 'image' && msg.image_url) {
+                        msgContent = `
+                            <div class="font-semibold text-[11px] opacity-75 mb-0.5">${escapeHTML(msg.sender_name)}</div>
+                            <div class="chat-img-bubble rounded-2xl overflow-hidden border border-white/20 shadow mt-1 mb-1 max-w-[180px] cursor-pointer" onclick="openLightbox('${msg.image_url}')">
+                                <img src="${msg.image_url}" alt="image message" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <span class="chat-msg-time text-right">${timeStr}</span>
+                        `;
+                    } else {
+                        msgContent = `
+                            <div class="font-semibold text-[11px] opacity-75 mb-0.5">${escapeHTML(msg.sender_name)}</div>
+                            <div class="text-[12px] whitespace-pre-wrap">${escapeHTML(msg.message)}</div>
+                            <span class="chat-msg-time text-right">${timeStr}</span>
+                        `;
+                    }
+                    msgDiv.innerHTML = msgContent;
                     chatFeed.appendChild(msgDiv);
+                });
+                
+                // Lightbox Modal Functions
+                window.openLightbox = function(url) {
+                    const lightbox = document.getElementById('chat-lightbox');
+                    const lightboxImg = document.getElementById('chat-lightbox-img');
+                    lightboxImg.src = url;
+                    lightbox.classList.remove('hidden');
+                    lightbox.classList.add('flex');
+                };
+                
+                document.getElementById('chat-lightbox-close').addEventListener('click', () => {
+                    const lightbox = document.getElementById('chat-lightbox');
+                    lightbox.classList.add('hidden');
+                    lightbox.classList.remove('flex');
                 });
                 
                 chatFeed.scrollTop = chatFeed.scrollHeight;

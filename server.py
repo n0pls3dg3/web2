@@ -208,8 +208,30 @@ def init_database():
                 [sender_name] NVARCHAR(100) DEFAULT NULL,
                 [message] NVARCHAR(MAX) NOT NULL,
                 [is_read] TINYINT DEFAULT 0,
+                [message_type] NVARCHAR(20) DEFAULT 'text' CHECK ([message_type] IN ('text', 'image')),
+                [image_url] NVARCHAR(255) DEFAULT NULL,
                 [created_at] DATETIME DEFAULT GETDATE()
             )
+        END
+        """)
+
+        # Database migrations for existing ChatMessages tables
+        cursor.execute("""
+        IF NOT EXISTS (
+            SELECT * FROM sys.columns 
+            WHERE object_id = OBJECT_ID(N'[dbo].[chat_messages]') AND name = 'message_type'
+        )
+        BEGIN
+            ALTER TABLE [dbo].[chat_messages] ADD [message_type] NVARCHAR(20) DEFAULT 'text';
+        END
+        """)
+        cursor.execute("""
+        IF NOT EXISTS (
+            SELECT * FROM sys.columns 
+            WHERE object_id = OBJECT_ID(N'[dbo].[chat_messages]') AND name = 'image_url'
+        )
+        BEGIN
+            ALTER TABLE [dbo].[chat_messages] ADD [image_url] NVARCHAR(255) DEFAULT NULL;
         END
         """)
 
@@ -1192,7 +1214,7 @@ def chat_get_messages():
             """, (session_id,))
             
             cursor.execute("""
-                SELECT id, session_id, sender_type, sender_name, message, is_read, 
+                SELECT id, session_id, sender_type, sender_name, message, is_read, message_type, image_url, 
                        CONVERT(VARCHAR(19), created_at, 120) as created_at 
                 FROM chat_messages 
                 WHERE session_id = %s 
@@ -1219,7 +1241,7 @@ def chat_get_messages():
             """, (my_session_id,))
             
             cursor.execute("""
-                SELECT id, session_id, sender_type, sender_name, message, is_read, 
+                SELECT id, session_id, sender_type, sender_name, message, is_read, message_type, image_url, 
                        CONVERT(VARCHAR(19), created_at, 120) as created_at 
                 FROM chat_messages 
                 WHERE session_id = %s 
@@ -1233,12 +1255,46 @@ def chat_get_messages():
 
 @app.route('/api/chat/send', methods=['POST'])
 def chat_send_message():
-    data = request.json or {}
-    message_text = data.get('message', '').strip()
-    if not message_text:
+    file = None
+    if 'file' in request.files:
+        file = request.files['file']
+    elif 'image' in request.files:
+        file = request.files['image']
+        
+    message_text = ""
+    message_type = 'text'
+    image_url = None
+    
+    if file and file.filename != '':
+        import os
+        import uuid
+        import time
+        
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+        ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        if ext not in allowed_extensions:
+            return jsonify({'success': False, 'message': 'Định dạng file không hỗ trợ. Chỉ cho phép PNG, JPG, JPEG, WEBP, GIF.'}), 400
+            
+        os.makedirs('uploads/chat', exist_ok=True)
+        
+        new_filename = f"{uuid.uuid4().hex}_{int(time.time())}.{ext}"
+        save_path = os.path.join('uploads/chat', new_filename)
+        file.save(save_path)
+        
+        image_url = f"/uploads/chat/{new_filename}"
+        message_type = 'image'
+        message_text = request.form.get('message', '').strip() or 'Đã gửi một hình ảnh'
+    else:
+        if request.is_json:
+            data = request.json or {}
+            message_text = data.get('message', '').strip()
+        else:
+            message_text = request.form.get('message', '').strip()
+            
+    if not message_text and not image_url:
         return jsonify({'success': False, 'message': 'Nội dung tin nhắn trống'}), 400
         
-    target_session_id = data.get('session_id')
+    target_session_id = request.form.get('session_id') or (request.json.get('session_id') if request.is_json else None)
     
     if target_session_id:
         if 'user_id' not in session or not session.get('is_admin'):
@@ -1250,11 +1306,11 @@ def chat_send_message():
             admin_name = session.get('user_fullname', 'Quản trị viên')
             
             cursor.execute("""
-                INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read) 
-                VALUES (%s, 'admin', %s, %s, 0)
-            """, (target_session_id, admin_name, message_text))
+                INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read, message_type, image_url) 
+                VALUES (%s, 'admin', %s, %s, 0, %s, %s)
+            """, (target_session_id, admin_name, message_text, message_type, image_url))
             conn.close()
-            return jsonify({'success': True})
+            return jsonify({'success': True, 'message_type': message_type, 'image_url': image_url, 'message': message_text})
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
     else:
@@ -1266,11 +1322,11 @@ def chat_send_message():
             conn = get_db_connection()
             cursor = conn.cursor(as_dict=True)
             cursor.execute("""
-                INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read) 
-                VALUES (%s, 'customer', %s, %s, 0)
-            """, (chat_sess['session_id'], chat_sess['name'], message_text))
+                INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read, message_type, image_url) 
+                VALUES (%s, 'customer', %s, %s, 0, %s, %s)
+            """, (chat_sess['session_id'], chat_sess['name'], message_text, message_type, image_url))
             conn.close()
-            return jsonify({'success': True})
+            return jsonify({'success': True, 'message_type': message_type, 'image_url': image_url, 'message': message_text})
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
 
@@ -1290,6 +1346,7 @@ def chat_get_conversations():
                     sender_name,
                     message,
                     is_read,
+                    message_type,
                     created_at,
                     ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY id DESC) as rn
                 FROM chat_messages
@@ -1307,6 +1364,7 @@ def chat_get_conversations():
                 lm.sender_type,
                 lm.sender_name,
                 lm.message,
+                lm.message_type,
                 CONVERT(VARCHAR(19), lm.created_at, 120) as created_at,
                 COALESCE(uc.unread_count, 0) as unread_count
             FROM LatestMessages lm
@@ -1337,6 +1395,10 @@ def serve_logo_files(filename):
 @app.route('/logo /<path:filename>')
 def serve_logo_space_files(filename):
     return send_from_directory('logo ', filename)
+
+@app.route('/uploads/<path:filename>')
+def serve_uploads(filename):
+    return send_from_directory('uploads', filename)
 
 
 if __name__ == '__main__':

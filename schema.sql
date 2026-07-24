@@ -113,6 +113,8 @@ BEGIN
         [sender_name] NVARCHAR(100) DEFAULT NULL,
         [message] NVARCHAR(MAX) NOT NULL,
         [is_read] TINYINT DEFAULT 0,
+        [message_type] NVARCHAR(20) DEFAULT 'text' CHECK ([message_type] IN ('text', 'image')),
+        [image_url] NVARCHAR(255) DEFAULT NULL,
         [created_at] DATETIME DEFAULT GETDATE()
     );
     CREATE INDEX IX_chat_messages_session ON [dbo].[chat_messages] (session_id);

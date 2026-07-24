@@ -134,6 +134,8 @@
 
                         <!-- Chat Message Input Footer -->
                         <div class="p-4 border-t border-stone-200/50 bg-white/30 flex gap-3 items-center flex-shrink-0">
+                            <input type="file" id="admin-chat-file-input" accept="image/*" class="hidden">
+                            <button id="admin-chat-attach-btn" type="button" class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white/60 hover:bg-white/90 text-stone-600 rounded-xl border border-white/50 transition-all shadow-md" title="Đính kèm hình ảnh"><i class="fa-solid fa-camera text-base"></i></button>
                             <input type="text" id="admin-chat-input" placeholder="Nhập câu trả lời cho khách hàng..." 
                                 class="flex-grow text-sm px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-red-800 focus:bg-white bg-white/50 transition-all">
                             <button id="admin-chat-send" class="px-5 py-3 bg-red-800 hover:bg-red-900 text-white font-bold rounded-xl shadow-lg flex items-center gap-2 transition-all">
@@ -144,6 +146,12 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Lightbox Modal for Chat Image Preview -->
+    <div id="chat-lightbox" class="fixed inset-0 z-[2000] bg-black/90 backdrop-blur-sm hidden flex-col items-center justify-center p-4">
+        <button id="chat-lightbox-close" class="absolute top-4 right-4 text-white/70 hover:text-white text-4xl font-light transition-colors leading-none">&times;</button>
+        <img id="chat-lightbox-img" src="" alt="preview" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain">
     </div>
 
     <!-- Admin Chat Scripts -->
@@ -160,6 +168,8 @@
             const chatFeed = document.getElementById('admin-chat-feed');
             const chatInput = document.getElementById('admin-chat-input');
             const chatSendBtn = document.getElementById('admin-chat-send');
+            const chatAttachBtn = document.getElementById('admin-chat-attach-btn');
+            const chatFileInput = document.getElementById('admin-chat-file-input');
             
             let activeSessionId = null;
             let activeCustomerName = null;
@@ -195,7 +205,9 @@
                     item.className = `p-4 flex items-center justify-between cursor-pointer border-b border-stone-200/40 hover:bg-white/40 transition-colors ${isActive ? 'bg-red-800/10 border-l-4 border-l-red-800 hover:bg-red-800/10' : ''}`;
                     
                     const name = c.sender_name || 'Khách vãng lai';
-                    const msgSnippet = c.message.length > 35 ? c.message.substring(0, 35) + '...' : c.message;
+                    const isImg = c.message_type === 'image';
+                    const snippetText = isImg ? '📷 [Hình ảnh]' : c.message;
+                    const msgSnippet = snippetText.length > 35 ? snippetText.substring(0, 35) + '...' : snippetText;
                     
                     let timeStr = '';
                     if (c.created_at) {
@@ -286,13 +298,27 @@
                         timeStr = parts.length > 1 ? parts[1].substring(0, 5) : '';
                     }
 
-                    bubble.innerHTML = `
-                        <div class="font-extrabold text-[10px] uppercase tracking-wider mb-1 ${isAdmin ? 'text-red-100' : 'text-stone-400'}">
-                            ${escapeHTML(msg.sender_name)}
-                        </div>
-                        <div class="whitespace-pre-wrap">${escapeHTML(msg.message)}</div>
-                        <div class="text-[8px] mt-1.5 opacity-60 text-right font-semibold">${timeStr}</div>
-                    `;
+                    let msgContent = '';
+                    if (msg.message_type === 'image' && msg.image_url) {
+                        msgContent = `
+                            <div class="font-extrabold text-[10px] uppercase tracking-wider mb-1 ${isAdmin ? 'text-red-100' : 'text-stone-400'}">
+                                ${escapeHTML(msg.sender_name)}
+                            </div>
+                            <div class="rounded-xl overflow-hidden border border-white/20 shadow mt-1 mb-1 max-w-[200px] cursor-pointer" onclick="openLightbox('${msg.image_url}')">
+                                <img src="${msg.image_url}" alt="image message" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <div class="text-[8px] mt-1.5 opacity-60 text-right font-semibold">${timeStr}</div>
+                        `;
+                    } else {
+                        msgContent = `
+                            <div class="font-extrabold text-[10px] uppercase tracking-wider mb-1 ${isAdmin ? 'text-red-100' : 'text-stone-400'}">
+                                ${escapeHTML(msg.sender_name)}
+                            </div>
+                            <div class="whitespace-pre-wrap">${escapeHTML(msg.message)}</div>
+                            <div class="text-[8px] mt-1.5 opacity-60 text-right font-semibold">${timeStr}</div>
+                        `;
+                    }
+                    bubble.innerHTML = msgContent;
 
                     container.appendChild(bubble);
                     chatFeed.appendChild(container);
@@ -300,6 +326,85 @@
 
                 chatFeed.scrollTop = chatFeed.scrollHeight;
                 lastMessageCount = messages.length;
+            }
+
+            // File Attachment Handlers
+            chatAttachBtn.addEventListener('click', () => {
+                chatFileInput.click();
+            });
+            
+            chatFileInput.addEventListener('change', () => {
+                if (chatFileInput.files.length > 0) {
+                    uploadAdminChatImage(chatFileInput.files[0]);
+                    chatFileInput.value = '';
+                }
+            });
+            
+            // Paste Handler (Clipboard paste images)
+            chatInput.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let item of items) {
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        uploadAdminChatImage(blob);
+                    }
+                }
+            });
+            
+            // Drag and Drop Handlers
+            chatFeed.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                chatFeed.classList.add('bg-red-500/5');
+            });
+            chatFeed.addEventListener('dragleave', () => {
+                chatFeed.classList.remove('bg-red-500/5');
+            });
+            chatFeed.addEventListener('drop', (e) => {
+                e.preventDefault();
+                chatFeed.classList.remove('bg-red-500/5');
+                if (e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        uploadAdminChatImage(file);
+                    }
+                }
+            });
+            
+            async function uploadAdminChatImage(file) {
+                if (!activeSessionId) return;
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("Kích thước hình ảnh quá lớn (Tối đa 5MB)!");
+                    return;
+                }
+                
+                const loadingMsg = document.createElement('div');
+                loadingMsg.className = 'flex w-full justify-end opacity-60';
+                loadingMsg.innerHTML = `<div class="max-w-[70%] p-3 rounded-xl bg-red-800 text-white text-[11px] font-semibold flex items-center gap-2"><i class="fa-solid fa-spinner animate-spin"></i> Đang tải ảnh...</div>`;
+                chatFeed.appendChild(loadingMsg);
+                chatFeed.scrollTop = chatFeed.scrollHeight;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('session_id', activeSessionId);
+                
+                try {
+                    const res = await fetch('/api/chat/send', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        loadActiveChatMessages();
+                        loadConversations();
+                    } else {
+                        alert(data.message || "Không thể gửi ảnh.");
+                        loadingMsg.remove();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Lỗi kết nối mạng.");
+                    loadingMsg.remove();
+                }
             }
 
             // Send Response Message
@@ -325,6 +430,21 @@
             }
 
             chatSendBtn.addEventListener('click', sendAdminMessage);
+            
+            // Lightbox Modal Functions
+            window.openLightbox = function(url) {
+                const lightbox = document.getElementById('chat-lightbox');
+                const lightboxImg = document.getElementById('chat-lightbox-img');
+                lightboxImg.src = url;
+                lightbox.classList.remove('hidden');
+                lightbox.classList.add('flex');
+            };
+            
+            document.getElementById('chat-lightbox-close').addEventListener('click', () => {
+                const lightbox = document.getElementById('chat-lightbox');
+                lightbox.classList.add('hidden');
+                lightbox.classList.remove('flex');
+            });
             chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendAdminMessage();
             });
