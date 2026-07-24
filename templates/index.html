@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Trang Chủ - Nội Thất Bảo Khang{% endblock %}
+
+{% block content %}
+<!-- Hero Banner Section -->
+<section class="relative bg-stone-900 text-white overflow-hidden min-h-[500px] flex items-center">
+    <div class="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-900/90 to-transparent z-10"></div>
+    <div class="absolute inset-0 bg-cover bg-center opacity-40 transform scale-105 transition-transform duration-1000" style="background-image: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1920&q=80');"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full py-20">
+        <div class="max-w-2xl space-y-6 fade-in-up">
+            <span class="text-amber-500 font-bold uppercase tracking-widest text-sm">Kiến Tạo Không Gian Sống</span>
+            <h1 class="text-4xl sm:text-6xl font-extrabold font-heading text-stone-150 leading-tight">
+                Nội Thất Sang Trọng <br>
+                <span class="text-amber-500">Bảo Khang</span>
+            </h1>
+            <p class="text-stone-300 text-base sm:text-lg leading-relaxed">
+                Chuyên thiết kế, thi công nội thất văn phòng và gia đình cao cấp tại TP.HCM. Cam kết chất lượng, bảo hành chính hãng và hỗ trợ lắp đặt tận nơi.
+            </p>
+            <div class="flex flex-wrap gap-4 pt-4">
+                <a href="{{ url_for('category') }}" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-8 py-3.5 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 font-heading">
+                    Xem Sản Phẩm
+                </a>
+                <a href="tel:{{ hotline }}" class="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-3.5 rounded-lg border border-white/30 backdrop-blur-sm transition-all transform hover:-translate-y-0.5 font-heading">
+                    Liên Hệ Ngay
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Brand Benefits -->
+<section class="bg-white border-b border-stone-200 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-50 transition-colors">
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 flex-shrink-0">
+                    <i class="fa-solid fa-truck-fast text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-stone-900 text-sm">Vận Chuyển Toàn Quốc</h4>
+                    <p class="text-stone-500 text-xs mt-0.5">Hỗ trợ giao hàng và lắp đặt tận nơi</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-50 transition-colors">
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 flex-shrink-0">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-stone-900 text-sm">Bảo Hành Chính Hãng</h4>
+                    <p class="text-stone-500 text-xs mt-0.5">Bảo hành lâu dài, an tâm sử dụng</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-50 transition-colors">
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 flex-shrink-0">
+                    <i class="fa-solid fa-pencil text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-stone-900 text-sm">Tư Vấn Thiết Kế</h4>
+                    <p class="text-stone-500 text-xs mt-0.5">Đo đạc khảo sát thực tế miễn phí</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-50 transition-colors">
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 flex-shrink-0">
+                    <i class="fa-solid fa-comments text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-stone-900 text-sm">Hỗ Trợ 24/7</h4>
+                    <p class="text-stone-500 text-xs mt-0.5">Phục vụ khách hàng nhanh chóng qua Zalo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Promotional Sale Section (Tủ Sale) -->
+{% if sale_products %}
+<section class="py-16 bg-red-50/50 border-b border-red-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row justify-between items-baseline mb-10 gap-2">
+            <div>
+                <span class="text-red-650 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-bolt-lightning text-amber-500 animate-pulse"></i> Cơ hội mua sắm giá hời</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-stone-900 font-heading mt-1">Sản Phẩm Khuyến Mãi Cực Sốc</h2>
+            </div>
+            <a href="{{ url_for('category', sale=1) }}" class="text-sm font-semibold text-red-700 hover:text-red-800 hover:underline flex items-center gap-1.5">
+                Xem tất cả khuyến mãi <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for prod in sale_products %}
+                <!-- Product Card -->
+                <div class="product-card bg-white rounded-xl shadow-md overflow-hidden border border-red-100 flex flex-col relative group">
+                    <div class="absolute top-3 left-3 bg-red-600 text-white font-bold text-xs px-2.5 py-1 rounded-full z-10 shadow-md">
+                        GIẢM GIÁ
+                    </div>
+                    
+                    <!-- Product Image -->
+                    <div class="relative aspect-square overflow-hidden bg-stone-100">
+                        {% if prod.image_path %}
+                            <img src="/{{ prod.image_path }}" alt="{{ prod.name }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
+                                <i class="fa-regular fa-image text-4xl"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Hover Overlay -->
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 gap-3">
+                            <a href="{{ url_for('detail', product_id=prod.id) }}" class="bg-white text-stone-900 hover:bg-amber-800 hover:text-white w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors" title="Xem chi tiết">
+                                <i class="fa-solid fa-eye text-sm"></i>
+                            </a>
+                            <a href="{{ url_for('cart_add', id=prod.id) }}" class="bg-amber-700 text-white hover:bg-amber-800 w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors" title="Thêm vào giỏ">
+                                <i class="fa-solid fa-cart-plus text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="p-5 flex-grow flex flex-col justify-between">
+                        <div class="space-y-1">
+                            <span class="text-stone-400 text-xs font-semibold uppercase tracking-wider block">{{ prod.code }}</span>
+                            <a href="{{ url_for('detail', product_id=prod.id) }}" class="text-base font-bold text-stone-900 hover:text-amber-850 line-clamp-2 block min-h-[48px]">
+                                {{ prod.name }}
+                            </a>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-stone-100">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-lg font-extrabold text-red-650">{{ format_price(prod.sale_price) }}</span>
+                                <span class="text-xs text-stone-400 line-through">{{ format_price(prod.original_price) }}</span>
+                            </div>
+                            <a href="{{ url_for('detail', product_id=prod.id) }}" class="mt-4 w-full bg-red-50 text-red-700 hover:bg-red-600 hover:text-white text-center py-2 rounded-lg font-semibold text-xs tracking-wider transition-colors block uppercase">
+                                Xem Chi Tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Latest Products Section -->
+<section class="py-16 bg-stone-50 border-b border-stone-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row justify-between items-baseline mb-10 gap-2">
+            <div>
+                <span class="text-amber-700 font-bold text-xs uppercase tracking-wider">Sản phẩm mới thiết kế</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-stone-900 font-heading mt-1">Sản Phẩm Nổi Bật Mới Nhất</h2>
+            </div>
+            <a href="{{ url_for('category') }}" class="text-sm font-semibold text-amber-700 hover:text-amber-800 hover:underline flex items-center gap-1.5">
+                Xem tất cả sản phẩm <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+        </div>
+
+        {% if latest_products %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {% for prod in latest_products %}
+                    <!-- Product Card -->
+                    <div class="product-card bg-white rounded-xl shadow-md overflow-hidden border border-stone-200 flex flex-col relative group">
+                        <!-- Product Image -->
+                        <div class="relative aspect-square overflow-hidden bg-stone-100">
+                            {% if prod.image_path %}
+                                <img src="/{{ prod.image_path }}" alt="{{ prod.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
+                                    <i class="fa-regular fa-image text-4xl"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Hover Overlay -->
+                            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10 gap-3">
+                                <a href="{{ url_for('detail', product_id=prod.id) }}" class="bg-white text-stone-900 hover:bg-amber-800 hover:text-white w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors" title="Xem chi tiết">
+                                    <i class="fa-solid fa-eye text-sm"></i>
+                                </a>
+                                <a href="{{ url_for('cart_add', id=prod.id) }}" class="bg-amber-700 text-white hover:bg-amber-800 w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors" title="Thêm vào giỏ">
+                                    <i class="fa-solid fa-cart-plus text-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Details -->
+                        <div class="p-5 flex-grow flex flex-col justify-between">
+                            <div class="space-y-1">
+                                <span class="text-stone-400 text-xs font-semibold uppercase tracking-wider block">{{ prod.code }}</span>
+                                <a href="{{ url_for('detail', product_id=prod.id) }}" class="text-base font-bold text-stone-900 hover:text-amber-855 line-clamp-2 block min-h-[48px]">
+                                    {{ prod.name }}
+                                </a>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-stone-100">
+                                <span class="text-sm font-bold text-amber-800 block min-h-[20px]">
+                                    {{ format_price(0) }}
+                                </span>
+                                <a href="{{ url_for('detail', product_id=prod.id) }}" class="mt-4 w-full bg-stone-100 text-stone-700 hover:bg-amber-700 hover:text-white text-center py-2 rounded-lg font-semibold text-xs tracking-wider transition-colors block uppercase">
+                                    Xem Chi Tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl text-center text-amber-800">
+                <i class="fa-solid fa-circle-exclamation text-3xl mb-2"></i>
+                <p class="font-medium">Chưa có dữ liệu sản phẩm hoặc dữ liệu đang được quét cập nhật tự động.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Brand Introduction Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <span class="text-amber-700 font-bold uppercase tracking-widest text-xs">Về chúng tôi</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-stone-900 font-heading">Nội Thất Bảo Khang – Điểm Nhấn Không Gian Hoàn Hảo</h2>
+                <p class="text-stone-600 text-sm leading-relaxed">
+                    Được hình thành từ đội ngũ kỹ sư thiết kế sáng tạo và thợ mộc tay nghề cao, Nội Thất Bảo Khang đã mang tới hàng nghìn sản phẩm nội thất cao cấp cho văn phòng làm việc và không gian gia đình trên khắp địa bàn TP.HCM và các tỉnh lân cận.
+                </p>
+                <p class="text-stone-600 text-sm leading-relaxed">
+                    Sản phẩm của chúng tôi luôn đi đầu trong việc sử dụng vật liệu chất lượng bền chắc (MDF chống ẩm phủ Melamine cao cấp, phụ kiện chính hãng...), phong cách thiết kế hiện đại tối ưu công năng sử dụng, đi kèm dịch vụ hỗ trợ lắp đặt, đo đạc trực tiếp chu đáo tận nhà.
+                </p>
+                <div class="grid grid-cols-2 gap-6 pt-4">
+                    <div class="border-l-4 border-amber-700 pl-4">
+                        <span class="text-3xl font-extrabold text-stone-900 block font-heading">500+</span>
+                        <span class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Khách hàng tin chọn</span>
+                    </div>
+                    <div class="border-l-4 border-amber-700 pl-4">
+                        <span class="text-3xl font-extrabold text-stone-900 block font-heading">10+</span>
+                        <span class="text-xs text-stone-500 uppercase tracking-wider font-semibold">Năm kinh nghiệm</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="relative">
+                <div class="absolute -inset-4 bg-amber-50 rounded-2xl -rotate-2 transform scale-95 z-0"></div>
+                <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80" alt="Xưởng sản xuất Nội Thất Bảo Khang" 
+                    class="rounded-2xl shadow-xl w-full h-[400px] object-cover relative z-10">
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị Hệ Thống - {{ brand_name }}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-stone-100 text-stone-800 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex flex-col border-r border-stone-850">
+        <div class="h-20 flex items-center justify-center border-b border-stone-800 px-6 gap-3">
+            <img class="h-10 w-auto object-contain bg-white/10 p-1 rounded" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
+            <div class="flex flex-col">
+                <span class="text-white text-sm font-bold font-heading leading-tight">{{ brand_name }}</span>
+                <span class="text-[10px] uppercase tracking-widest text-amber-500 font-semibold leading-none">ADMIN PANEL</span>
+            </div>
+        </div>
+        
+        <nav class="flex-grow py-6 px-4 space-y-2 text-sm font-semibold">
+            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors bg-stone-800 text-white">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-chart-line text-lg w-6"></i>
+                    <span>Bảng Thống Kê</span>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('admin_orders') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-receipt text-lg w-6"></i>
+                    <span>Quản Lý Đơn Hàng</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_products') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-couch text-lg w-6"></i>
+                    <span>Quản Lý Sản Phẩm</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_users') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-users-gear text-lg w-6"></i>
+                    <span>Tài Khoản Đăng Ký</span>
+                </div>
+            </a>
+        </nav>
+
+        <div class="border-t border-stone-800 p-4 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-bold">
+                    A
+                </div>
+                <div>
+                    <span class="text-stone-300 font-bold block">{{ session.get('user_fullname', 'Quản trị viên') }}</span>
+                    <span class="text-stone-500 font-semibold uppercase text-[9px] tracking-wider">Quản trị tối cao</span>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="text-stone-500 hover:text-red-500 transition-colors" title="Đăng xuất">
+                <i class="fa-solid fa-right-from-bracket text-base"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Content Workspace -->
+    <div class="flex-grow flex flex-col min-w-0">
+        <header class="h-20 bg-white border-b border-stone-200 flex items-center justify-between px-8">
+            <div class="flex items-center gap-2 text-stone-500 font-semibold text-xs uppercase tracking-wider">
+                <a href="{{ url_for('index') }}" target="_blank" class="hover:text-amber-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-globe"></i> Xem trang chính <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-grow p-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, msg in messages %}
+                        <div class="{% if category == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% else %}bg-red-50 border-l-4 border-red-500 text-red-700{% endif %} p-4 rounded-r shadow-sm mb-6 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid {% if category == 'success' %}fa-circle-check text-green-500{% else %}fa-circle-xmark text-red-500{% endif %}"></i>
+                                <p class="text-sm font-medium">{{ msg }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="space-y-8">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-stone-900 font-heading">Bảng Điều Khiển Quản Trị</h1>
+                    <p class="text-sm text-stone-500 mt-1">Tổng hợp số liệu thống kê và thông tin hoạt động gần đây của cửa hàng.</p>
+                </div>
+
+                <!-- Statistics Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-stone-400 uppercase tracking-wider block">Tổng số đơn hàng</span>
+                            <span class="text-3xl font-extrabold text-stone-900 font-heading">{{ count_orders }}</span>
+                            <span class="text-2xs text-amber-600 font-bold block mt-1"><i class="fa-solid fa-clock mr-1"></i>{{ count_pending }} chờ xử lý</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-stone-400 uppercase tracking-wider block">Tổng số sản phẩm</span>
+                            <span class="text-3xl font-extrabold text-stone-900 font-heading">{{ count_products }}</span>
+                            <span class="text-2xs text-stone-500 font-semibold block mt-1"><a href="{{ url_for('admin_products') }}" class="underline hover:text-amber-850">Quản lý kho hàng &rarr;</a></span>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-800 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-couch"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-stone-400 uppercase tracking-wider block">Người dùng đăng ký</span>
+                            <span class="text-3xl font-extrabold text-stone-900 font-heading">{{ count_users }}</span>
+                            <span class="text-2xs text-stone-500 font-semibold block mt-1"><a href="{{ url_for('admin_users') }}" class="underline hover:text-amber-850">Danh sách tài khoản &rarr;</a></span>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-green-50 text-green-800 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex items-center justify-between">
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-stone-400 uppercase tracking-wider block">Doanh thu chốt</span>
+                            <span class="text-2xl font-extrabold text-stone-900 font-heading">{{ format_price(total_revenue) }}</span>
+                            <span class="text-2xs text-stone-550 block mt-1"><i class="fa-solid fa-circle-check text-green-500 mr-1"></i>Từ {{ count_completed }} đơn hoàn thành</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-purple-50 text-purple-800 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Recent Orders -->
+                    <div class="lg:col-span-2 bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="h-16 px-6 border-b border-stone-150 flex items-center justify-between">
+                                <h3 class="font-bold text-stone-950 font-heading">Đơn Hàng Gần Đây</h3>
+                                <a href="{{ url_for('admin_orders') }}" class="text-xs font-semibold text-amber-700 hover:text-amber-850 hover:underline">Tất cả đơn hàng &rarr;</a>
+                            </div>
+                            
+                            {% if recent_orders %}
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-stone-50 text-2xs font-bold text-stone-450 uppercase border-b border-stone-150">
+                                            <th class="py-3.5 px-6">Mã Đơn</th>
+                                            <th class="py-3.5 px-6">Khách hàng</th>
+                                            <th class="py-3.5 px-6">Số điện thoại</th>
+                                            <th class="py-3.5 px-6">Tổng tiền</th>
+                                            <th class="py-3.5 px-6 text-center">Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-stone-150">
+                                        {% for ord in recent_orders %}
+                                            <tr>
+                                                <td class="py-3.5 px-6 font-bold text-stone-900">#{{ ord.id }}</td>
+                                                <td class="py-3.5 px-6 font-medium text-stone-700">{{ ord.customer_name }}</td>
+                                                <td class="py-3.5 px-6 text-stone-500">{{ ord.customer_phone }}</td>
+                                                <td class="py-3.5 px-6 font-bold text-stone-900">{{ format_price(ord.total_amount) }}</td>
+                                                <td class="py-3.5 px-6 text-center">
+                                                    {% if ord.status == 'pending' %}
+                                                        <span class="bg-amber-100 text-amber-800 text-2xs px-2 py-0.5 rounded-full font-bold uppercase">Chờ xử lý</span>
+                                                    {% elif ord.status == 'processing' %}
+                                                        <span class="bg-blue-100 text-blue-800 text-2xs px-2 py-0.5 rounded-full font-bold uppercase">Đang làm</span>
+                                                    {% elif ord.status == 'completed' %}
+                                                        <span class="bg-green-100 text-green-800 text-2xs px-2 py-0.5 rounded-full font-bold uppercase">Xong</span>
+                                                    {% else %}
+                                                        <span class="bg-stone-150 text-stone-600 text-2xs px-2 py-0.5 rounded-full font-bold uppercase">Hủy</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <p class="p-6 text-stone-500 text-sm italic">Chưa có đơn hàng nào.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quick Access -->
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
+                        <h3 class="font-bold text-stone-955 font-heading border-b border-stone-150 pb-2">Hệ Thống Lối Tắt</h3>
+                        
+                        <div class="grid grid-cols-1 gap-3.5">
+                            <a href="{{ url_for('admin_products', action='add_new') }}" class="flex items-center gap-3 p-4 rounded-lg bg-stone-50 border border-stone-150 hover:border-amber-700 hover:bg-amber-50/20 group transition-all">
+                                <div class="w-10 h-10 rounded-full bg-amber-600/10 text-amber-700 flex items-center justify-center text-sm font-bold flex-shrink-0 group-hover:bg-amber-700 group-hover:text-white transition-colors">
+                                    <i class="fa-solid fa-plus"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900">Thêm sản phẩm mới</h4>
+                                    <p class="text-[10px] text-stone-400 mt-0.5">Upload ảnh sản phẩm lên database</p>
+                                </div>
+                            </a>
+
+                            <a href="{{ url_for('admin_orders') }}" class="flex items-center gap-3 p-4 rounded-lg bg-stone-50 border border-stone-150 hover:border-amber-700 hover:bg-amber-50/20 group transition-all">
+                                <div class="w-10 h-10 rounded-full bg-amber-600/10 text-amber-700 flex items-center justify-center text-sm font-bold flex-shrink-0 group-hover:bg-amber-700 group-hover:text-white transition-colors">
+                                    <i class="fa-solid fa-truck-ramp-box"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900">Duyệt đơn hàng mới</h4>
+                                    <p class="text-[10px] text-stone-400 mt-0.5">Cập nhật tiến trình sản xuất, giao hàng</p>
+                                </div>
+                            </a>
+
+                            <a href="{{ url_for('index') }}" target="_blank" class="flex items-center gap-3 p-4 rounded-lg bg-stone-50 border border-stone-150 hover:border-amber-700 hover:bg-amber-50/20 group transition-all">
+                                <div class="w-10 h-10 rounded-full bg-amber-600/10 text-amber-700 flex items-center justify-center text-sm font-bold flex-shrink-0 group-hover:bg-amber-700 group-hover:text-white transition-colors">
+                                    <i class="fa-solid fa-eye"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900">Trang chủ bán hàng</h4>
+                                    <p class="text-[10px] text-stone-400 mt-0.5">Mở giao diện khách hàng</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="h-14 border-t border-stone-200 bg-white flex items-center justify-between px-8 text-xs text-stone-500">
+            <span>&copy; 2026 {{ brand_name }}. Quản Trị Hệ Thống.</span>
+            <span>Phiên bản 1.0.0</span>
+        </footer>
+    </div>
+</body>
+</html>
