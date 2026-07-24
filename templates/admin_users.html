@@ -6,73 +6,73 @@
     <title>Quản Lý Tài Khoản - {{ brand_name }}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link class="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-stone-100 text-stone-800 min-h-screen flex flex-col md:flex-row">
+<body class="text-stone-855 min-h-screen flex flex-col md:flex-row">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-full md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex flex-col border-r border-stone-850">
-        <div class="h-20 flex items-center justify-center border-b border-stone-800 px-6 gap-3">
-            <img class="h-10 w-auto object-contain bg-white/10 p-1 rounded" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
+    <!-- Sidebar Navigation (Dark Glassmorphism) -->
+    <aside class="w-full md:w-64 glass-panel-dark text-stone-300 flex-shrink-0 flex flex-col border-r border-white/10 relative z-30">
+        <div class="h-20 flex items-center justify-center border-b border-white/10 px-6 gap-3">
+            <img class="h-10 w-auto object-contain bg-white/10 p-1 rounded-xl border border-white/20" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
             <div class="flex flex-col">
-                <span class="text-white text-sm font-bold font-heading leading-tight">{{ brand_name }}</span>
-                <span class="text-[10px] uppercase tracking-widest text-amber-500 font-semibold leading-none">ADMIN PANEL</span>
+                <span class="text-white text-sm font-extrabold font-heading leading-tight">{{ brand_name }}</span>
+                <span class="text-[9px] uppercase tracking-widest text-amber-500 font-bold leading-none">ADMIN PANEL</span>
             </div>
         </div>
         
-        <nav class="flex-grow py-6 px-4 space-y-2 text-sm font-semibold">
-            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+        <nav class="flex-grow py-6 px-4 space-y-2 text-xs font-bold uppercase tracking-wider">
+            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-chart-line text-lg w-6"></i>
-                    <span>Bảng Thống Kê</span>
+                    <i class="fa-solid fa-chart-line text-base w-5 text-stone-450"></i>
+                    <span>Thống Kê</span>
                 </div>
             </a>
             
-            <a href="{{ url_for('admin_orders') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+            <a href="{{ url_for('admin_orders') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-receipt text-lg w-6"></i>
-                    <span>Quản Lý Đơn Hàng</span>
+                    <i class="fa-solid fa-receipt text-base w-5 text-stone-400"></i>
+                    <span>Đơn Hàng</span>
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_products') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+            <a href="{{ url_for('admin_products') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-couch text-lg w-6"></i>
-                    <span>Quản Lý Sản Phẩm</span>
+                    <i class="fa-solid fa-couch text-base w-5 text-stone-400"></i>
+                    <span>Sản Phẩm</span>
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_users') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors bg-stone-800 text-white">
+            <a href="{{ url_for('admin_users') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all bg-white/10 text-white border border-white/10 shadow-md">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-users-gear text-lg w-6"></i>
-                    <span>Tài Khoản Đăng Ký</span>
+                    <i class="fa-solid fa-users-gear text-base w-5 text-amber-505"></i>
+                    <span>Tài Khoản</span>
                 </div>
             </a>
         </nav>
 
-        <div class="border-t border-stone-800 p-4 flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-bold">
+        <div class="border-t border-white/10 p-4 flex items-center justify-between text-2xs font-bold">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-bold border border-amber-500/20">
                     A
                 </div>
                 <div>
-                    <span class="text-stone-300 font-bold block">{{ session.get('user_fullname', 'Quản trị viên') }}</span>
-                    <span class="text-stone-500 font-semibold uppercase text-[9px] tracking-wider">Quản trị tối cao</span>
+                    <span class="text-stone-250 block leading-tight">{{ session.get('user_fullname', 'Quản trị viên') }}</span>
+                    <span class="text-stone-500 text-[9px] uppercase tracking-widest block mt-0.5">Administrator</span>
                 </div>
             </div>
             <a href="{{ url_for('logout') }}" class="text-stone-500 hover:text-red-500 transition-colors" title="Đăng xuất">
-                <i class="fa-solid fa-right-from-bracket text-base"></i>
+                <i class="fa-solid fa-right-from-bracket text-sm"></i>
             </a>
         </div>
     </aside>
 
     <!-- Content Workspace -->
     <div class="flex-grow flex flex-col min-w-0">
-        <header class="h-20 bg-white border-b border-stone-200 flex items-center justify-between px-8">
-            <div class="flex items-center gap-2 text-stone-500 font-semibold text-xs uppercase tracking-wider">
+        <header class="h-20 bg-white/40 border-b border-stone-200/50 flex items-center justify-between px-8 backdrop-blur-md">
+            <div class="flex items-center gap-2 text-stone-500 font-bold text-[10px] uppercase tracking-widest">
                 <a href="{{ url_for('index') }}" target="_blank" class="hover:text-amber-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-globe"></i> Xem trang chính <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                    <i class="fa-solid fa-globe"></i> Xem trang bán hàng <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
                 </a>
             </div>
         </header>
@@ -81,10 +81,10 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, msg in messages %}
-                        <div class="{% if category == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% else %}bg-red-50 border-l-4 border-red-500 text-red-700{% endif %} p-4 rounded-r shadow-sm mb-6 flex items-center justify-between">
+                        <div class="{% if category == 'success' %}bg-green-50/90 border-l-4 border-green-500 text-green-700{% else %}bg-red-50/90 border-l-4 border-red-500 text-red-700{% endif %} p-4 rounded-xl shadow-sm mb-6 flex items-center justify-between glass-panel">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid {% if category == 'success' %}fa-circle-check text-green-500{% else %}fa-circle-xmark text-red-500{% endif %}"></i>
-                                <p class="text-sm font-medium">{{ msg }}</p>
+                                <p class="text-sm font-semibold">{{ msg }}</p>
                             </div>
                         </div>
                     {% endfor %}
@@ -94,16 +94,16 @@
             <div class="space-y-8">
                 <div>
                     <h1 class="text-3xl font-extrabold text-stone-900 font-heading">Quản Lý Tài Khoản</h1>
-                    <p class="text-sm text-stone-500 mt-1">Danh sách người dùng và nhân viên quản trị đã đăng ký tài khoản trên hệ thống.</p>
+                    <p class="text-xs text-stone-500 uppercase tracking-widest font-bold mt-1">Danh sách người dùng đăng ký tài khoản trên hệ thống.</p>
                 </div>
 
-                <!-- Users table -->
-                <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+                <!-- Users table inside Glass Panel -->
+                <div class="glass-panel bg-white/60 rounded-2xl shadow-xl overflow-hidden">
                     {% if users %}
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm border-collapse">
+                            <table class="w-full text-left text-xs border-collapse">
                                 <thead>
-                                    <tr class="bg-stone-50 text-2xs font-bold text-stone-450 uppercase border-b border-stone-200">
+                                    <tr class="bg-white/30 text-3xs font-extrabold text-stone-500 uppercase border-b border-stone-200/50">
                                         <th class="py-4 px-6 w-20">ID</th>
                                         <th class="py-4 px-6">Tên Đăng Nhập</th>
                                         <th class="py-4 px-6">Họ Và Tên</th>
@@ -112,25 +112,25 @@
                                         <th class="py-4 px-6 w-48">Ngày Đăng Ký</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-stone-200 text-stone-700">
+                                <tbody class="divide-y divide-stone-200/50 text-stone-700 font-semibold">
                                     {% for user in users %}
-                                        <tr>
+                                        <tr class="hover:bg-white/30 transition-colors">
                                             <td class="py-4 px-6 font-bold text-stone-900">#{{ user.id }}</td>
-                                            <td class="py-4 px-6 font-medium">{{ user.username }}</td>
-                                            <td class="py-4 px-6 font-semibold text-stone-850">{{ user.fullname if user.fullname else 'Chưa cập nhật' }}</td>
-                                            <td class="py-4 px-6 text-stone-500 font-medium">{{ user.phone if user.phone else 'Chưa cập nhật' }}</td>
+                                            <td class="py-4 px-6 font-bold text-stone-950">{{ user.username }}</td>
+                                            <td class="py-4 px-6 text-stone-850">{{ user.fullname if user.fullname else 'Chưa cập nhật' }}</td>
+                                            <td class="py-4 px-6 text-stone-500 font-bold">{{ user.phone if user.phone else 'Chưa cập nhật' }}</td>
                                             <td class="py-4 px-6 text-center">
                                                 {% if user.role == 'admin' %}
-                                                    <span class="bg-amber-100 text-amber-800 border border-amber-200 text-2xs px-2.5 py-0.5 rounded-full font-bold uppercase">
+                                                    <span class="bg-amber-100/80 text-amber-900 border border-amber-200/30 text-3xs px-2.5 py-1 rounded-full font-extrabold uppercase tracking-wider">
                                                         Admin
                                                     </span>
                                                 {% else %}
-                                                    <span class="bg-stone-100 text-stone-600 border border-stone-200 text-2xs px-2.5 py-0.5 rounded-full font-bold uppercase">
+                                                    <span class="bg-stone-200/80 text-stone-600 border border-stone-300/30 text-3xs px-2.5 py-1 rounded-full font-extrabold uppercase tracking-wider">
                                                         Khách hàng
                                                     </span>
                                                 {% endif %}
                                             </td>
-                                            <td class="py-4 px-6 text-stone-400 text-xs">
+                                            <td class="py-4 px-6 text-stone-400 text-[11px] font-semibold">
                                                 {{ user.created_at.strftime('%d/%m/%Y %H:%M') if user.created_at else '' }}
                                             </td>
                                         </tr>
@@ -139,7 +139,7 @@
                             </table>
                         </div>
                     {% else %}
-                        <div class="p-8 text-center text-stone-500 italic space-y-2">
+                        <div class="p-12 text-center text-stone-500 italic space-y-2.5">
                             <i class="fa-regular fa-folder-open text-4xl text-stone-300"></i>
                             <p>Không tìm thấy tài khoản người dùng nào.</p>
                         </div>
@@ -148,9 +148,9 @@
             </div>
         </main>
         
-        <footer class="h-14 border-t border-stone-200 bg-white flex items-center justify-between px-8 text-xs text-stone-500">
+        <footer class="h-14 border-t border-stone-200/50 bg-white/40 flex items-center justify-between px-8 text-2xs font-bold text-stone-500 backdrop-blur-md">
             <span>&copy; 2026 {{ brand_name }}. Quản Trị Hệ Thống.</span>
-            <span>Phiên bản 1.0.0</span>
+            <span>Version 1.1.0</span>
         </footer>
     </div>
 </body>

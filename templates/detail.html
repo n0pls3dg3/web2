@@ -3,14 +3,14 @@
 {% block title %}{{ product.name }} - Chi tiết sản phẩm - Nội Thất Bảo Khang{% endblock %}
 
 {% block content %}
-<div class="bg-stone-100 py-6 border-b border-stone-200">
+<div class="bg-white/40 backdrop-blur-md py-6 border-b border-stone-200/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="flex text-xs font-semibold text-stone-500 gap-2 items-center">
+        <nav class="flex text-xs font-bold text-stone-500 gap-2 items-center">
             <a href="{{ url_for('index') }}" class="hover:text-amber-800"><i class="fa-solid fa-house mr-1"></i> Trang chủ</a>
-            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+            <i class="fa-solid fa-chevron-right text-[8px] text-stone-400"></i>
             {% if product.category_slug %}
                 <a href="{{ url_for('category', slug=product.category_slug) }}" class="hover:text-amber-800">{{ product.category_name }}</a>
-                <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                <i class="fa-solid fa-chevron-right text-[8px] text-stone-400"></i>
             {% endif %}
             <span class="text-stone-855">{{ product.name }}</span>
         </nav>
@@ -22,7 +22,7 @@
         
         <!-- Left Column: Interactive Image Gallery -->
         <div class="lg:col-span-7 space-y-4">
-            <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm aspect-[4/3] flex items-center justify-center p-4 relative">
+            <div class="glass-panel bg-white/60 border border-white/40 rounded-3xl overflow-hidden shadow-xl aspect-[4/3] flex items-center justify-center p-4 relative">
                 {% if product.is_sale %}
                     <span class="absolute top-4 left-4 bg-red-655 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow z-10">GIẢM GIÁ</span>
                 {% endif %}
@@ -41,8 +41,8 @@
                 <div class="flex items-center gap-3 overflow-x-auto py-2 no-scrollbar">
                     {% for img in images %}
                         <button onclick="changeMainImage('/{{ img.image_path }}', this)" 
-                            class="w-20 h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden bg-white p-1 transition-all {% if loop.first %}border-amber-700 shadow-md transform -translate-y-0.5{% else %}border-stone-200{% endif %}">
-                            <img src="/{{ img.image_path }}" alt="Hình {{ loop.index }}" class="w-full h-full object-cover">
+                            class="w-20 h-20 rounded-2xl border bg-white/70 backdrop-blur-md p-1 transition-all flex-shrink-0 {% if loop.first %}border-amber-800 shadow-md transform -translate-y-0.5{% else %}border-white/30{% endif %}">
+                            <img src="/{{ img.image_path }}" alt="Hình {{ loop.index }}" class="w-full h-full object-cover rounded-xl">
                         </button>
                     {% endfor %}
                 </div>
@@ -51,8 +51,8 @@
 
         <!-- Right Column: Product Detail & Quick Order Form -->
         <div class="lg:col-span-5 space-y-6">
-            <div class="space-y-2 border-b border-stone-200 pb-6">
-                <span class="inline-block bg-amber-50 text-amber-800 font-bold text-xs px-2.5 py-1 rounded-md uppercase tracking-wider">
+            <div class="space-y-2 border-b border-stone-200/50 pb-6">
+                <span class="inline-block bg-amber-50/80 text-amber-900 border border-amber-200/30 font-bold text-2xs px-2.5 py-1 rounded-lg uppercase tracking-wider">
                     Mã sản phẩm: {{ product.code }}
                 </span>
                 <h1 class="text-3xl font-extrabold text-stone-900 font-heading tracking-tight leading-tight">
@@ -72,69 +72,69 @@
             </div>
 
             <div class="space-y-3">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-stone-900 font-heading"><i class="fa-solid fa-align-left text-amber-700 mr-2"></i>Mô Tả Sản Phẩm</h3>
-                <p class="text-sm text-stone-600 leading-relaxed bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                <h3 class="text-xs font-extrabold uppercase tracking-widest text-stone-900 font-heading flex items-center gap-2"><i class="fa-solid fa-align-left text-amber-800"></i> Mô Tả Sản Phẩm</h3>
+                <div class="glass-panel p-5 rounded-2xl text-stone-600 text-sm leading-relaxed shadow-sm">
                     {{ product.description|replace('\n', '<br>')|safe if product.description else standard_description }}
-                </p>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 text-xs font-semibold text-stone-700 bg-stone-100 p-4 rounded-xl">
-                <div class="flex items-center gap-2"><i class="fa-solid fa-truck text-amber-700 text-sm"></i> Hỗ trợ vận chuyển tận nơi</div>
-                <div class="flex items-center gap-2"><i class="fa-solid fa-screwdriver-wrench text-amber-700 text-sm"></i> Lắp đặt chuyên nghiệp</div>
-                <div class="flex items-center gap-2"><i class="fa-solid fa-shield text-amber-700 text-sm"></i> Bảo hành chính hãng</div>
-                <div class="flex items-center gap-2"><i class="fa-solid fa-headset text-amber-700 text-sm"></i> Hỗ trợ kỹ thuật 24/7</div>
+            <div class="grid grid-cols-2 gap-4 text-[10px] font-bold uppercase tracking-wider text-stone-700 bg-white/40 border border-white/20 p-4 rounded-2xl">
+                <div class="flex items-center gap-2.5"><i class="fa-solid fa-truck text-amber-800 text-xs"></i> Vận chuyển tận nơi</div>
+                <div class="flex items-center gap-2.5"><i class="fa-solid fa-screwdriver-wrench text-amber-800 text-xs"></i> Lắp đặt chuyên nghiệp</div>
+                <div class="flex items-center gap-2.5"><i class="fa-solid fa-shield text-amber-800 text-xs"></i> Bảo hành chính hãng</div>
+                <div class="flex items-center gap-2.5"><i class="fa-solid fa-headset text-amber-800 text-xs"></i> Hỗ trợ kỹ thuật 24/7</div>
             </div>
 
             <!-- Cart Addition Form -->
             <form action="{{ url_for('cart_add') }}" method="GET" class="flex gap-3 pt-2">
                 <input type="hidden" name="id" value="{{ product.id }}">
                 
-                <div class="flex border border-stone-300 rounded-lg overflow-hidden bg-white">
-                    <button type="button" onclick="adjustQty(-1)" class="px-3 py-2 text-stone-500 hover:bg-stone-50 hover:text-stone-850 font-bold border-r border-stone-200">&minus;</button>
-                    <input type="number" id="qty-input" name="qty" value="1" min="1" class="w-12 text-center focus:outline-none font-bold text-sm bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                    <button type="button" onclick="adjustQty(1)" class="px-3 py-2 text-stone-500 hover:bg-stone-50 hover:text-stone-850 font-bold border-l border-stone-200">&plus;</button>
+                <div class="flex border border-stone-300 rounded-xl overflow-hidden bg-white/80 backdrop-blur-md">
+                    <button type="button" onclick="adjustQty(-1)" class="px-3.5 py-2 text-stone-500 hover:bg-stone-50 font-bold border-r border-stone-200/50">&minus;</button>
+                    <input type="number" id="qty-input" name="qty" value="1" min="1" class="w-12 text-center focus:outline-none font-bold text-sm bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                    <button type="button" onclick="adjustQty(1)" class="px-3.5 py-2 text-stone-500 hover:bg-stone-50 font-bold border-l border-stone-200/50">&plus;</button>
                 </div>
                 
-                <button type="submit" class="flex-grow bg-amber-700 hover:bg-amber-850 text-white font-bold py-3 px-6 rounded-lg text-sm transition-all flex items-center justify-center gap-2 font-heading shadow">
+                <button type="submit" class="flex-grow bg-amber-800 hover:bg-amber-900 text-white font-bold py-3.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 font-heading shadow-lg active:scale-[0.98]">
                     <i class="fa-solid fa-cart-plus"></i> Thêm Vào Giỏ Hàng
                 </button>
             </form>
 
             <!-- QUICK ORDER FORM -->
-            <div class="bg-amber-50/50 p-6 rounded-xl border border-amber-200 space-y-4 shadow-sm">
+            <div class="glass-panel p-6 rounded-3xl border border-amber-900/10 space-y-4 shadow-xl">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-bolt-lightning text-amber-700 text-lg"></i>
-                    <h3 class="text-base font-extrabold text-amber-950 font-heading">Đặt Hàng Nhanh Không Cần Đăng Ký</h3>
+                    <i class="fa-solid fa-bolt-lightning text-amber-800 text-lg animate-pulse"></i>
+                    <h3 class="text-sm font-extrabold text-amber-955 font-heading uppercase tracking-wider">Đặt Hàng Nhanh Không Cần Đăng Ký</h3>
                 </div>
-                <p class="text-xs text-amber-900 leading-relaxed">Để tiết kiệm thời gian, quý khách chỉ cần nhập thông tin liên hệ bên dưới. Chúng tôi sẽ gọi lại ngay để xác nhận đơn hàng.</p>
+                <p class="text-xs text-amber-900 leading-relaxed font-semibold">Để tiết kiệm thời gian, quý khách chỉ cần nhập thông tin liên hệ bên dưới. Chúng tôi sẽ gọi lại ngay để xác nhận đơn hàng.</p>
                 
                 <form action="{{ url_for('checkout', action='quick_order') }}" method="POST" class="space-y-3.5">
                     <input type="hidden" name="product_id" value="{{ product.id }}">
                     
                     <div>
                         <input type="text" name="customer_name" required placeholder="Họ và tên của bạn *" 
-                            class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"
                             value="{{ session.get('user_fullname', '') }}">
                     </div>
                     
                     <div>
                         <input type="text" name="customer_phone" required placeholder="Số điện thoại liên hệ *" 
-                            class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"
                             placeholder="090xxxxxxxx"
                             value="{{ session.get('user_phone', '') }}">
                     </div>
                     
                     <div>
                         <input type="text" name="customer_address" required placeholder="Địa chỉ nhận hàng *" 
-                            class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold">
                     </div>
                     
                     <div>
                         <textarea name="note" rows="2" placeholder="Ghi chú yêu cầu thêm (màu sắc, kích thước...)" 
-                            class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"></textarea>
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"></textarea>
                     </div>
                     
-                    <button type="submit" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3 rounded-lg text-sm transition-colors uppercase tracking-wider font-heading shadow-md">
+                    <button type="submit" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3.5 rounded-xl text-xs transition-all uppercase tracking-widest font-heading shadow-md active:scale-[0.98]">
                         Gửi Đơn Đặt Hàng Nhanh
                     </button>
                 </form>
@@ -151,12 +151,12 @@
         
         const buttons = btn.parentElement.getElementsByTagName('button');
         for (let b of buttons) {
-            b.classList.remove('border-amber-700', 'shadow-md', '-translate-y-0.5');
-            b.classList.add('border-stone-200');
+            b.classList.remove('border-amber-800', 'shadow-md', '-translate-y-0.5');
+            b.classList.add('border-white/30');
         }
         
-        btn.classList.remove('border-stone-200');
-        btn.classList.add('border-amber-700', 'shadow-md', '-translate-y-0.5');
+        btn.classList.remove('border-white/30');
+        btn.classList.add('border-amber-800', 'shadow-md', '-translate-y-0.5');
     }
 
     function adjustQty(amount) {

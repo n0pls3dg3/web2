@@ -424,12 +424,41 @@ def index():
         
     return render_template('index.html', sale_products=sale_products, latest_products=latest_products)
 
+def make_pagination(current_page, total_pages):
+    pages = []
+    if total_pages <= 7:
+        return list(range(1, total_pages + 1))
+        
+    pages.append(1)
+    if current_page > 3:
+        pages.append('...')
+        
+    start = max(2, current_page - 1)
+    end = min(total_pages - 1, current_page + 1)
+    
+    if current_page <= 3:
+        end = 4
+    if current_page >= total_pages - 2:
+        start = total_pages - 3
+        
+    for p in range(start, end + 1):
+        if p not in pages:
+            pages.append(p)
+            
+    if current_page < total_pages - 2:
+        pages.append('...')
+        
+    if total_pages not in pages:
+        pages.append(total_pages)
+        
+    return pages
+
 # Route: Catalog Browsing
 @app.route('/category')
 def category():
     page = request.args.get('page', 1, type=int)
     if page < 1: page = 1
-    limit = 10
+    limit = 12
     
     slug = request.args.get('slug', '').strip()
     is_sale_filter = request.args.get('sale', 0, type=int) == 1
@@ -509,9 +538,10 @@ def category():
     if search_query:
         filter_text += f" (Tìm kiếm: \"{search_query}\")"
         
+    pages = make_pagination(page, total_pages)
     return render_template('category.html', products=products, current_category=current_category, slug=slug,
                            sale=is_sale_filter, search=search_query, total_rows=total_rows, page=page,
-                           total_pages=total_pages, filter_text=filter_text)
+                           total_pages=total_pages, pages=pages, filter_text=filter_text)
 
 # Route: Product Details
 @app.route('/product/<int:product_id>')

@@ -3,11 +3,11 @@
 {% block title %}Giỏ Hàng - Nội Thất Bảo Khang{% endblock %}
 
 {% block content %}
-<div class="bg-stone-100 py-6 border-b border-stone-200">
+<div class="bg-white/40 border-b border-stone-200/50 py-6 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="flex text-xs font-semibold text-stone-500 gap-2 items-center">
-            <a href="{{ url_for('index') }}" class="hover:text-amber-800"><i class="fa-solid fa-house mr-1"></i> Trang chủ</a>
-            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+        <nav class="flex text-xs font-bold text-stone-500 gap-2 items-center">
+            <a href="{{ url_for('index') }}" class="hover:text-amber-900"><i class="fa-solid fa-house mr-1"></i> Trang chủ</a>
+            <i class="fa-solid fa-chevron-right text-[8px] text-stone-400"></i>
             <span class="text-stone-855">Giỏ hàng của bạn</span>
         </nav>
     </div>
@@ -21,10 +21,10 @@
             
             <!-- Cart Items List (Left Column) -->
             <div class="lg:col-span-8 space-y-4">
-                <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+                <div class="glass-panel rounded-2xl overflow-hidden shadow-xl">
                     <table class="w-full border-collapse text-left">
                         <thead>
-                            <tr class="bg-stone-50 border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+                            <tr class="bg-white/30 border-b border-white/20 text-xs font-bold uppercase tracking-widest text-stone-550">
                                 <th class="p-4">Sản phẩm</th>
                                 <th class="p-4 hidden sm:table-cell">Đơn giá</th>
                                 <th class="p-4">Số lượng</th>
@@ -32,7 +32,7 @@
                                 <th class="p-4 text-center">Xóa</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-stone-150">
+                        <tbody class="divide-y divide-stone-200/40">
                             {% set ns = namespace(total_cart_amount=0, has_real_prices=false) %}
                             {% for key, item in session.get('cart').items() %}
                                 {% set price_display = "" %}
@@ -51,7 +51,7 @@
                                     <!-- Product Info -->
                                     <td class="p-4">
                                         <div class="flex items-center gap-3.5">
-                                            <div class="w-16 h-16 rounded-lg overflow-hidden border border-stone-200 bg-stone-100 flex-shrink-0">
+                                            <div class="w-16 h-16 rounded-xl overflow-hidden border border-white/40 bg-white/40 flex-shrink-0">
                                                 {% if item.image_path %}
                                                     <img src="/{{ item.image_path }}" alt="{{ item.name }}" class="w-full h-full object-cover">
                                                 {% else %}
@@ -62,7 +62,7 @@
                                             </div>
                                             <div>
                                                 <span class="text-stone-450 text-[10px] font-bold block uppercase">{{ item.code }}</span>
-                                                <a href="{{ url_for('detail', product_id=item.id) }}" class="font-bold text-stone-900 hover:text-amber-800 line-clamp-1">
+                                                <a href="{{ url_for('detail', product_id=item.id) }}" class="font-extrabold text-stone-900 hover:text-amber-800 line-clamp-1 leading-tight">
                                                     {{ item.name }}
                                                 </a>
                                             </div>
@@ -70,29 +70,29 @@
                                     </td>
                                     
                                     <!-- Unit Price -->
-                                    <td class="p-4 hidden sm:table-cell font-medium">
+                                    <td class="p-4 hidden sm:table-cell font-bold text-stone-800">
                                         {{ price_display }}
                                     </td>
                                     
                                     <!-- Qty Selector -->
                                     <td class="p-4">
-                                        <div class="flex items-center border border-stone-300 rounded-md overflow-hidden bg-white w-24">
-                                            <button type="button" onclick="adjustCartQty('{{ key }}', -1)" class="px-2 py-1 text-stone-500 hover:bg-stone-50 font-bold border-r border-stone-200">&minus;</button>
+                                        <div class="flex items-center border border-stone-300 rounded-xl overflow-hidden bg-white/80 backdrop-blur-md w-24">
+                                            <button type="button" onclick="adjustCartQty('{{ key }}', -1)" class="px-2.5 py-1.5 text-stone-500 hover:bg-stone-55 font-bold border-r border-stone-200/50">&minus;</button>
                                             <input type="number" id="qty-{{ key }}" name="quantities[{{ key }}]" value="{{ item.quantity }}" min="1" 
-                                                class="w-8 text-center focus:outline-none font-bold text-xs bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                                            <button type="button" onclick="adjustCartQty('{{ key }}', 1)" class="px-2 py-1 text-stone-500 hover:bg-stone-50 font-bold border-l border-stone-200">&plus;</button>
+                                                class="w-8 text-center focus:outline-none font-bold text-xs bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                            <button type="button" onclick="adjustCartQty('{{ key }}', 1)" class="px-2.5 py-1.5 text-stone-500 hover:bg-stone-55 font-bold border-l border-stone-200/50">&plus;</button>
                                         </div>
                                     </td>
                                     
                                     <!-- Item Subtotal -->
-                                    <td class="p-4 font-bold text-stone-900">
+                                    <td class="p-4 font-extrabold text-stone-900">
                                         {{ total_display }}
                                     </td>
                                     
                                     <!-- Remove Button -->
                                     <td class="p-4 text-center">
-                                        <a href="{{ url_for('cart_delete', product_id=item.id) }}" class="text-stone-400 hover:text-red-650 transition-colors" title="Xóa">
-                                            <i class="fa-regular fa-trash-can text-lg"></i>
+                                        <a href="{{ url_for('cart_delete', product_id=item.id) }}" class="inline-flex w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-650 items-center justify-center border border-red-100 transition-colors" title="Xóa">
+                                            <i class="fa-regular fa-trash-can text-sm"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -102,17 +102,17 @@
                 </div>
 
                 <div class="flex flex-wrap justify-between gap-4 pt-2">
-                    <a href="{{ url_for('category') }}" class="bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-2.5 px-6 rounded-lg text-sm transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
+                    <a href="{{ url_for('category') }}" class="bg-stone-200/70 hover:bg-stone-300/80 text-stone-700 font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-colors flex items-center gap-2 border border-stone-300/30">
+                        <i class="fa-solid fa-arrow-left"></i> Mua thêm
                     </a>
                     
                     <div class="flex gap-3">
                         <a href="{{ url_for('cart_clear') }}" onclick="return confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?')" 
-                            class="bg-red-50 hover:bg-red-100 text-red-750 border border-red-200 font-bold py-2.5 px-6 rounded-lg text-sm transition-colors">
-                            Xóa toàn bộ giỏ
+                            class="bg-red-50/70 hover:bg-red-100 text-red-750 border border-red-200/40 font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-colors">
+                            Xóa giỏ
                         </a>
-                        <button type="submit" class="bg-amber-700 hover:bg-amber-850 text-white font-bold py-2.5 px-6 rounded-lg text-sm transition-colors shadow">
-                            Cập nhật giỏ hàng
+                        <button type="submit" class="bg-amber-800 hover:bg-amber-900 text-white font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md active:scale-[0.98]">
+                            Cập nhật giỏ
                         </button>
                     </div>
                 </div>
@@ -120,15 +120,15 @@
 
             <!-- Summary & Checkout Info (Right Column) -->
             <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
-                    <h3 class="text-stone-900 font-bold uppercase tracking-wider text-xs border-b border-stone-150 pb-2 font-heading">
+                <div class="glass-panel p-6 rounded-3xl shadow-xl space-y-6">
+                    <h3 class="text-stone-900 font-extrabold uppercase tracking-widest text-[11px] border-b border-stone-200/50 pb-2.5 font-heading">
                         Tổng Hợp Đơn Hàng
                     </h3>
                     
-                    <div class="space-y-3.5 text-sm">
+                    <div class="space-y-4 text-xs font-bold">
                         <div class="flex justify-between">
                             <span class="text-stone-500">Tạm tính:</span>
-                            <span class="font-bold text-stone-900">
+                            <span class="text-stone-900">
                                 {% if ns.has_real_prices %}
                                     {{ format_price(ns.total_cart_amount) }}
                                 {% else %}
@@ -138,11 +138,11 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-stone-500">Phí giao hàng:</span>
-                            <span class="font-semibold text-stone-900">Miễn phí lắp đặt</span>
+                            <span class="text-green-650">Miễn phí lắp đặt</span>
                         </div>
-                        <div class="border-t border-stone-150 pt-4 flex justify-between items-baseline">
-                            <span class="text-base font-bold text-stone-900">Tổng thanh toán:</span>
-                            <span class="text-xl font-extrabold text-amber-850">
+                        <div class="border-t border-stone-200/60 pt-4 flex justify-between items-baseline">
+                            <span class="text-sm font-extrabold text-stone-900 font-heading uppercase">Tổng tiền:</span>
+                            <span class="text-xl font-extrabold text-amber-900">
                                 {% if ns.has_real_prices %}
                                     {{ format_price(ns.total_cart_amount) }}
                                 {% else %}
@@ -152,32 +152,32 @@
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-stone-150">
-                        <a href="{{ url_for('checkout') }}" class="w-full bg-amber-800 hover:bg-amber-900 text-white text-center font-bold py-3.5 rounded-lg text-sm block transition-all shadow font-heading uppercase tracking-wider">
+                    <div class="pt-2 border-t border-stone-200/60">
+                        <a href="{{ url_for('checkout') }}" class="w-full bg-amber-800 hover:bg-amber-900 text-white text-center font-bold py-3.5 rounded-xl text-xs block transition-all shadow-lg font-heading uppercase tracking-widest active:scale-[0.98]">
                             Tiến Hành Đặt Hàng
                         </a>
                     </div>
                 </div>
                 
-                <div class="bg-stone-100 p-4 rounded-xl text-xs text-stone-550 space-y-2 border border-stone-200">
-                    <div class="flex gap-2 items-center font-bold text-stone-700">
-                        <i class="fa-solid fa-shield text-amber-700"></i> Bảo Mật & Tin Cậy
+                <div class="bg-white/40 border border-white/20 p-5 rounded-2xl text-2xs text-stone-500 space-y-2.5 shadow-sm">
+                    <div class="flex gap-2 items-center font-extrabold text-stone-700 uppercase tracking-wider">
+                        <i class="fa-solid fa-shield text-amber-850"></i> Chính Sách Mua Sắm
                     </div>
-                    <p class="leading-relaxed">Đơn hàng của bạn sẽ được xử lý bảo mật. Nhân viên Nội Thất Bảo Khang sẽ liên hệ trực tiếp trong 15 phút sau khi nhận được yêu cầu.</p>
+                    <p class="leading-relaxed font-semibold">Đơn hàng của bạn sẽ được xử lý bảo mật. Nhân viên tư vấn Nội Thất Bảo Khang sẽ chủ động liên hệ trực tiếp qua điện thoại trong vòng 15 phút để hoàn tất.</p>
                 </div>
             </div>
             
         </form>
     {% else %}
-        <div class="bg-white border border-stone-250 p-16 rounded-2xl text-center space-y-6 shadow-sm max-w-xl mx-auto">
-            <div class="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 mx-auto">
-                <i class="fa-solid fa-cart-shopping text-4xl"></i>
+        <div class="glass-panel p-16 rounded-3xl text-center space-y-6 shadow-xl max-w-xl mx-auto">
+            <div class="w-20 h-20 rounded-full bg-amber-50/50 flex items-center justify-center text-amber-900 border border-amber-100/50 mx-auto">
+                <i class="fa-solid fa-cart-shopping text-3xl"></i>
             </div>
-            <div class="space-y-1">
-                <h3 class="font-bold text-stone-900 text-lg font-heading">Giỏ Hàng Trống</h3>
-                <p class="text-sm text-stone-500">Bạn chưa thêm bất kỳ sản phẩm nào vào giỏ hàng của mình.</p>
+            <div class="space-y-1.5">
+                <h3 class="font-extrabold text-stone-900 text-lg font-heading uppercase tracking-wider">Giỏ Hàng Trống</h3>
+                <p class="text-xs text-stone-500">Bạn chưa thêm bất kỳ sản phẩm nội thất nào vào giỏ hàng của mình.</p>
             </div>
-            <a href="{{ url_for('category') }}" class="inline-block bg-amber-700 hover:bg-amber-800 text-white font-bold px-8 py-3.5 rounded-lg text-sm shadow-md transition-colors font-heading">
+            <a href="{{ url_for('category') }}" class="inline-block bg-amber-755 hover:bg-amber-850 text-white font-bold px-8 py-3.5 rounded-xl text-xs shadow-md transition-colors font-heading uppercase tracking-wider active:scale-[0.98]">
                 Tiếp Tục Mua Sắm
             </a>
         </div>

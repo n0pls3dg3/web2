@@ -9,70 +9,70 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-stone-100 text-stone-800 min-h-screen flex flex-col md:flex-row">
+<body class="text-stone-855 min-h-screen flex flex-col md:flex-row">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-full md:w-64 bg-stone-900 text-stone-300 flex-shrink-0 flex flex-col border-r border-stone-850">
-        <div class="h-20 flex items-center justify-center border-b border-stone-800 px-6 gap-3">
-            <img class="h-10 w-auto object-contain bg-white/10 p-1 rounded" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
+    <!-- Sidebar Navigation (Dark Glassmorphism) -->
+    <aside class="w-full md:w-64 glass-panel-dark text-stone-300 flex-shrink-0 flex flex-col border-r border-white/10 relative z-30">
+        <div class="h-20 flex items-center justify-center border-b border-white/10 px-6 gap-3">
+            <img class="h-10 w-auto object-contain bg-white/10 p-1 rounded-xl border border-white/20" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
             <div class="flex flex-col">
-                <span class="text-white text-sm font-bold font-heading leading-tight">{{ brand_name }}</span>
-                <span class="text-[10px] uppercase tracking-widest text-amber-500 font-semibold leading-none">ADMIN PANEL</span>
+                <span class="text-white text-sm font-extrabold font-heading leading-tight">{{ brand_name }}</span>
+                <span class="text-[9px] uppercase tracking-widest text-amber-500 font-bold leading-none">ADMIN PANEL</span>
             </div>
         </div>
         
-        <nav class="flex-grow py-6 px-4 space-y-2 text-sm font-semibold">
-            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+        <nav class="flex-grow py-6 px-4 space-y-2 text-xs font-bold uppercase tracking-wider">
+            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-chart-line text-lg w-6"></i>
-                    <span>Bảng Thống Kê</span>
+                    <i class="fa-solid fa-chart-line text-base w-5 text-stone-450"></i>
+                    <span>Thống Kê</span>
                 </div>
             </a>
             
-            <a href="{{ url_for('admin_orders') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+            <a href="{{ url_for('admin_orders') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-receipt text-lg w-6"></i>
-                    <span>Quản Lý Đơn Hàng</span>
+                    <i class="fa-solid fa-receipt text-base w-5 text-stone-400"></i>
+                    <span>Đơn Hàng</span>
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_products') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors bg-stone-800 text-white">
+            <a href="{{ url_for('admin_products') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all bg-white/10 text-white border border-white/10 shadow-md">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-couch text-lg w-6"></i>
-                    <span>Quản Lý Sản Phẩm</span>
+                    <i class="fa-solid fa-couch text-base w-5 text-amber-505"></i>
+                    <span>Sản Phẩm</span>
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_users') }}" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-stone-800 hover:text-white transition-colors">
+            <a href="{{ url_for('admin_users') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-users-gear text-lg w-6"></i>
-                    <span>Tài Khoản Đăng Ký</span>
+                    <i class="fa-solid fa-users-gear text-base w-5 text-stone-400"></i>
+                    <span>Tài Khoản</span>
                 </div>
             </a>
         </nav>
 
-        <div class="border-t border-stone-800 p-4 flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-bold">
+        <div class="border-t border-white/10 p-4 flex items-center justify-between text-2xs font-bold">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-bold border border-amber-500/20">
                     A
                 </div>
                 <div>
-                    <span class="text-stone-300 font-bold block">{{ session.get('user_fullname', 'Quản trị viên') }}</span>
-                    <span class="text-stone-500 font-semibold uppercase text-[9px] tracking-wider">Quản trị tối cao</span>
+                    <span class="text-stone-250 block leading-tight">{{ session.get('user_fullname', 'Quản trị viên') }}</span>
+                    <span class="text-stone-500 text-[9px] uppercase tracking-widest block mt-0.5">Administrator</span>
                 </div>
             </div>
             <a href="{{ url_for('logout') }}" class="text-stone-500 hover:text-red-500 transition-colors" title="Đăng xuất">
-                <i class="fa-solid fa-right-from-bracket text-base"></i>
+                <i class="fa-solid fa-right-from-bracket text-sm"></i>
             </a>
         </div>
     </aside>
 
     <!-- Content Workspace -->
     <div class="flex-grow flex flex-col min-w-0">
-        <header class="h-20 bg-white border-b border-stone-200 flex items-center justify-between px-8">
-            <div class="flex items-center gap-2 text-stone-500 font-semibold text-xs uppercase tracking-wider">
+        <header class="h-20 bg-white/40 border-b border-stone-200/50 flex items-center justify-between px-8 backdrop-blur-md">
+            <div class="flex items-center gap-2 text-stone-500 font-bold text-[10px] uppercase tracking-widest">
                 <a href="{{ url_for('index') }}" target="_blank" class="hover:text-amber-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-globe"></i> Xem trang chính <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                    <i class="fa-solid fa-globe"></i> Xem trang bán hàng <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
                 </a>
             </div>
         </header>
@@ -81,10 +81,10 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, msg in messages %}
-                        <div class="{% if category == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% else %}bg-red-50 border-l-4 border-red-500 text-red-700{% endif %} p-4 rounded-r shadow-sm mb-6 flex items-center justify-between">
+                        <div class="{% if category == 'success' %}bg-green-50/90 border-l-4 border-green-500 text-green-700{% else %}bg-red-50/90 border-l-4 border-red-500 text-red-700{% endif %} p-4 rounded-xl shadow-sm mb-6 flex items-center justify-between glass-panel">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid {% if category == 'success' %}fa-circle-check text-green-500{% else %}fa-circle-xmark text-red-500{% endif %}"></i>
-                                <p class="text-sm font-medium">{{ msg }}</p>
+                                <p class="text-sm font-semibold">{{ msg }}</p>
                             </div>
                         </div>
                     {% endfor %}
@@ -95,21 +95,21 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 class="text-3xl font-extrabold text-stone-900 font-heading">Quản Lý Sản Phẩm</h1>
-                        <p class="text-sm text-stone-500 mt-1">Quản lý danh sách các sản phẩm nội thất trong kho dữ liệu.</p>
+                        <p class="text-xs text-stone-500 uppercase tracking-widest font-bold mt-1">Cập nhật kho sản phẩm nội thất trong hệ thống.</p>
                     </div>
                     <button onclick="toggleAddModal(true)" 
-                        class="bg-amber-700 hover:bg-amber-800 text-white font-bold py-2.5 px-6 rounded-lg text-sm transition-all flex items-center gap-2 shadow font-heading">
-                        <i class="fa-solid fa-plus text-xs"></i> Thêm Sản Phẩm Mới
+                        class="bg-amber-800 hover:bg-amber-900 text-white font-bold py-3 px-6 rounded-xl text-xs transition-all flex items-center gap-2 shadow-lg font-heading uppercase tracking-wider active:scale-95">
+                        <i class="fa-solid fa-plus"></i> Thêm Sản Phẩm Mới
                     </button>
                 </div>
 
-                <!-- Products grid listing -->
-                <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+                <!-- Products Table inside Glass Panel -->
+                <div class="glass-panel bg-white/60 rounded-2xl shadow-xl overflow-hidden">
                     {% if products %}
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm border-collapse">
+                            <table class="w-full text-left text-xs border-collapse">
                                 <thead>
-                                    <tr class="bg-stone-50 text-2xs font-bold text-stone-450 uppercase border-b border-stone-200">
+                                    <tr class="bg-white/30 text-3xs font-extrabold text-stone-500 uppercase border-b border-stone-200/50">
                                         <th class="py-4 px-6 w-20">Ảnh</th>
                                         <th class="py-4 px-6 w-28">Mã SP</th>
                                         <th class="py-4 px-6">Tên Sản Phẩm</th>
@@ -118,11 +118,11 @@
                                         <th class="py-4 px-6 text-center w-28">Hành động</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-stone-200">
+                                <tbody class="divide-y divide-stone-200/50">
                                     {% for prod in products %}
-                                        <tr>
+                                        <tr class="hover:bg-white/30 transition-colors font-semibold">
                                             <td class="py-3 px-6">
-                                                <div class="w-12 h-12 rounded-lg overflow-hidden border border-stone-200 bg-stone-100 flex items-center justify-center">
+                                                <div class="w-12 h-12 rounded-xl overflow-hidden border border-white/40 bg-white/40 flex items-center justify-center shadow-inner">
                                                     {% if prod.image_path %}
                                                         <img src="/{{ prod.image_path }}" alt="thumb" class="w-full h-full object-cover">
                                                     {% else %}
@@ -131,31 +131,31 @@
                                                 </div>
                                             </td>
                                             
-                                            <td class="py-3 px-6 font-bold text-stone-900">{{ prod.code }}</td>
+                                            <td class="py-3 px-6 font-extrabold text-stone-900">{{ prod.code }}</td>
                                             
-                                            <td class="py-3 px-6 font-semibold text-stone-850">
+                                            <td class="py-3 px-6 font-bold text-stone-850">
                                                 <a href="{{ url_for('detail', product_id=prod.id) }}" target="_blank" class="hover:text-amber-800 flex items-center gap-1.5">
                                                     {{ prod.name }}
-                                                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-stone-400"></i>
+                                                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-stone-450"></i>
                                                 </a>
                                             </td>
                                             
-                                            <td class="py-3 px-6 text-stone-500 font-medium">{{ prod.category_name if prod.category_name else 'Chưa phân loại' }}</td>
+                                            <td class="py-3 px-6 text-stone-500 font-semibold">{{ prod.category_name if prod.category_name else 'Chưa phân loại' }}</td>
                                             
                                             <td class="py-3 px-6">
                                                 {% if prod.is_sale %}
-                                                    <div class="space-y-0.5 text-xs">
+                                                    <div class="space-y-0.5 text-3xs font-bold">
                                                         <span class="font-extrabold text-red-650 block">{{ format_price(prod.sale_price) }}</span>
-                                                        <span class="text-stone-400 line-through text-2xs block">{{ format_price(prod.original_price) }}</span>
+                                                        <span class="text-stone-400 line-through block">{{ format_price(prod.original_price) }}</span>
                                                     </div>
                                                 {% else %}
-                                                    <span class="text-xs text-stone-500 italic">Giá liên hệ</span>
+                                                    <span class="text-stone-500 italic">Giá liên hệ</span>
                                                 {% endif %}
                                             </td>
                                             
                                             <td class="py-3 px-6 text-center">
                                                 <a href="{{ url_for('admin_products', action='delete', id=prod.id) }}" 
-                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm {{ prod.code }}? Hành động này sẽ tự động xóa tất cả ảnh đi kèm!')"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm {{ prod.code }}?')"
                                                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-650 transition-colors border border-red-150"
                                                     title="Xóa sản phẩm">
                                                     <i class="fa-regular fa-trash-can"></i>
@@ -167,7 +167,7 @@
                             </table>
                         </div>
                     {% else %}
-                        <div class="p-8 text-center text-stone-500 italic space-y-2">
+                        <div class="p-12 text-center text-stone-500 italic space-y-2.5">
                             <i class="fa-regular fa-folder-open text-4xl text-stone-300"></i>
                             <p>Không tìm thấy sản phẩm nào trong cơ sở dữ liệu.</p>
                         </div>
@@ -176,42 +176,42 @@
             </div>
         </main>
         
-        <footer class="h-14 border-t border-stone-200 bg-white flex items-center justify-between px-8 text-xs text-stone-500">
+        <footer class="h-14 border-t border-stone-200/50 bg-white/40 flex items-center justify-between px-8 text-2xs font-bold text-stone-500 backdrop-blur-md">
             <span>&copy; 2026 {{ brand_name }}. Quản Trị Hệ Thống.</span>
-            <span>Phiên bản 1.0.0</span>
+            <span>Version 1.1.0</span>
         </footer>
     </div>
 </body>
 
-<!-- Modal Overlay: Add Product -->
-<div id="add-product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm {% if action != 'add_new' %}hidden{% endif %} flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden max-h-[90vh] flex flex-col">
+<!-- Modal Overlay: Add Product (Liquid Glassmorphism UI) -->
+<div id="add-product-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm {% if action != 'add_new' %}hidden{% endif %} flex items-center justify-center p-4">
+    <div class="glass-panel bg-white/80 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-white/40">
         <!-- Header -->
-        <div class="h-16 px-6 border-b border-stone-150 flex items-center justify-between bg-stone-50">
-            <h3 class="font-extrabold text-stone-900 font-heading text-lg">Thêm Sản Phẩm Mới</h3>
+        <div class="h-16 px-6 border-b border-stone-200/50 flex items-center justify-between bg-white/40">
+            <h3 class="font-extrabold text-stone-900 font-heading text-base uppercase tracking-wider">Thêm Sản Phẩm Mới</h3>
             <button onclick="toggleAddModal(false)" class="text-stone-400 hover:text-stone-600 text-2xl font-bold">&times;</button>
         </div>
         
         <!-- Form body -->
-        <form action="{{ url_for('admin_products', action='add') }}" method="POST" enctype="multipart/form-data" class="flex-grow overflow-y-auto p-6 space-y-4">
+        <form action="{{ url_for('admin_products', action='add') }}" method="POST" enctype="multipart/form-data" class="flex-grow overflow-y-auto p-6 space-y-4 font-semibold">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="code" class="block text-xs font-semibold text-stone-700 mb-1">Mã Sản Phẩm *</label>
+                    <label for="code" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Mã Sản Phẩm *</label>
                     <input type="text" name="code" id="code" required placeholder="Ví dụ: TVP101" 
-                        class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                        class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
                 </div>
                 <div>
-                    <label for="name" class="block text-xs font-semibold text-stone-700 mb-1">Tên Sản Phẩm *</label>
+                    <label for="name" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Tên Sản Phẩm *</label>
                     <input type="text" name="name" id="name" required placeholder="Ví dụ: Tủ hồ sơ di động" 
-                        class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                        class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="category_id" class="block text-xs font-semibold text-stone-700 mb-1">Danh Mục Sản Phẩm *</label>
+                    <label for="category_id" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Danh Mục Sản Phẩm *</label>
                     <select name="category_id" id="category_id" required 
-                        class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                        class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900 cursor-pointer">
                         <option value="">-- Chọn danh mục con --</option>
                         {% for cat in categories %}
                             <option value="{{ cat.id }}">{{ cat.parent_name }} &gt; {{ cat.name }}</option>
@@ -219,55 +219,55 @@
                     </select>
                 </div>
                 <div>
-                    <label for="price_type" class="block text-xs font-semibold text-stone-700 mb-1">Cấu hình giá hiển thị *</label>
+                    <label for="price_type" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Cấu hình giá hiển thị *</label>
                     <select name="price_type" id="price_type" onchange="togglePriceFields(this.value)" 
-                        class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                        class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900 cursor-pointer">
                         <option value="contact">Giá liên hệ (Mặc định)</option>
                         <option value="number">Nhập số tiền VNĐ</option>
                     </select>
                 </div>
             </div>
 
-            <div id="price-number-fields" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4 bg-stone-50 p-4 rounded-xl border border-stone-200">
+            <div id="price-number-fields" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white/40 p-4 rounded-2xl border border-white/20">
                 <div>
-                    <label for="original_price" class="block text-xs font-semibold text-stone-700 mb-1">Giá gốc (VNĐ) *</label>
+                    <label for="original_price" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Giá gốc (VNĐ) *</label>
                     <input type="text" name="original_price" id="original_price" placeholder="4.800.000" onkeyup="formatMoney(this)"
-                        class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                        class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
                 </div>
                 <div>
-                    <label for="sale_price" class="block text-xs font-semibold text-stone-700 mb-1">Giá Sale (Khuyến mãi) *</label>
+                    <label for="sale_price" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Giá Sale *</label>
                     <input type="text" name="sale_price" id="sale_price" placeholder="3.800.000" onkeyup="formatMoney(this)"
-                        class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
+                        class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900">
                 </div>
                 <div class="flex items-center h-full pt-6 pl-4">
                     <input id="is_sale" name="is_sale" type="checkbox" value="1"
                         class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-stone-300 rounded">
-                    <label for="is_sale" class="ml-2 block text-xs font-bold text-stone-700">
+                    <label for="is_sale" class="ml-2 block text-xs font-bold text-stone-750 cursor-pointer">
                         Kích hoạt Sale
                     </label>
                 </div>
             </div>
 
             <div>
-                <label for="images" class="block text-xs font-semibold text-stone-700 mb-1">Tải lên hình ảnh sản phẩm * (Có thể chọn nhiều tệp)</label>
+                <label for="images" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Tải lên hình ảnh * (Có thể chọn nhiều tệp)</label>
                 <input type="file" name="images" id="images" required multiple accept="image/*"
-                    class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
+                    class="w-full text-xs text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-2xs file:font-bold file:uppercase file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer">
             </div>
 
             <div>
-                <label for="description" class="block text-xs font-semibold text-stone-700 mb-1">Mô tả sản phẩm</label>
+                <label for="description" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Mô tả sản phẩm</label>
                 <textarea name="description" id="description" rows="4" 
-                    class="w-full px-4 py-2 border border-stone-300 rounded-lg text-sm bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
-                    placeholder="Nhập mô tả sản phẩm (Để trống để lấy mô tả tiêu chuẩn)..."></textarea>
+                    class="w-full px-4 py-2 border border-stone-300 rounded-xl text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
+                    placeholder="Nhập mô tả sản phẩm (Để trống sẽ tự lấy mô tả tiêu chuẩn của thương hiệu)..."></textarea>
             </div>
             
-            <div class="pt-4 border-t border-stone-150 flex justify-end gap-3 bg-stone-50 -mx-6 -mb-6 p-4">
+            <div class="pt-4 border-t border-stone-200/50 flex justify-end gap-3 bg-white/40 -mx-6 -mb-6 p-4">
                 <button type="button" onclick="toggleAddModal(false)" 
-                    class="px-5 py-2 border border-stone-300 hover:bg-stone-100 rounded-lg text-xs font-bold text-stone-700">
+                    class="px-5 py-2 border border-stone-300 hover:bg-stone-100/70 rounded-xl text-xs font-bold text-stone-700">
                     Hủy bỏ
                 </button>
                 <button type="submit" 
-                    class="px-5 py-2 bg-amber-700 hover:bg-amber-800 rounded-lg text-xs font-bold text-white shadow">
+                    class="px-5 py-2 bg-amber-800 hover:bg-amber-900 rounded-xl text-xs font-bold text-white shadow active:scale-95 transition-all">
                     Lưu sản phẩm
                 </button>
             </div>

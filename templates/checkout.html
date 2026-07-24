@@ -3,14 +3,14 @@
 {% block title %}Thanh Toán Đơn Hàng - Nội Thất Bảo Khang{% endblock %}
 
 {% block content %}
-<div class="bg-stone-100 py-6 border-b border-stone-200">
+<div class="bg-white/40 border-b border-stone-200/50 py-6 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="flex text-xs font-semibold text-stone-500 gap-2 items-center">
-            <a href="{{ url_for('index') }}" class="hover:text-amber-800"><i class="fa-solid fa-house mr-1"></i> Trang chủ</a>
-            <i class="fa-solid fa-chevron-right text-[8px]"></i>
-            <a href="{{ url_for('cart_view') }}" class="hover:text-amber-800">Giỏ hàng</a>
-            <i class="fa-solid fa-chevron-right text-[8px]"></i>
-            <span class="text-stone-855">Đặt hàng</span>
+        <nav class="flex text-xs font-bold text-stone-500 gap-2 items-center">
+            <a href="{{ url_for('index') }}" class="hover:text-amber-900"><i class="fa-solid fa-house mr-1"></i> Trang chủ</a>
+            <i class="fa-solid fa-chevron-right text-[8px] text-stone-400"></i>
+            <a href="{{ url_for('cart_view') }}" class="hover:text-amber-900">Giỏ hàng</a>
+            <i class="fa-solid fa-chevron-right text-[8px] text-stone-400"></i>
+            <span class="text-stone-855">Thanh toán</span>
         </nav>
     </div>
 </div>
@@ -19,31 +19,31 @@
     
     {% if success_order %}
         <!-- Success Screen -->
-        <div class="bg-white p-8 rounded-2xl border border-stone-200 shadow-lg text-center space-y-6 max-w-xl mx-auto animate-fade-in-up">
-            <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center text-green-500 mx-auto">
+        <div class="glass-panel p-8 rounded-3xl shadow-2xl text-center space-y-6 max-w-xl mx-auto glass-fade-in">
+            <div class="w-20 h-20 rounded-full bg-green-50/70 border border-green-200/50 flex items-center justify-center text-green-500 mx-auto">
                 <i class="fa-solid fa-circle-check text-5xl"></i>
             </div>
             <div class="space-y-2">
                 <h1 class="text-2xl font-extrabold text-stone-900 font-heading">Đặt Hàng Thành Công!</h1>
-                <p class="text-sm text-stone-600">Đơn hàng <strong class="text-amber-850">#{{ success_order }}</strong> của bạn đã được tiếp nhận và xử lý.</p>
-                <p class="text-xs text-stone-500">Chúng tôi đã gửi thông tin chi tiết đơn hàng đến hệ thống email quản trị. Đội ngũ tư vấn viên sẽ gọi điện cho bạn để chốt thời gian giao hàng trong giây lát.</p>
+                <p class="text-sm text-stone-600 font-semibold">Đơn hàng <strong class="text-amber-900">#{{ success_order }}</strong> của bạn đã được tiếp nhận.</p>
+                <p class="text-xs text-stone-500 leading-relaxed">Thông tin chi tiết đã được gửi đến quản trị viên. Đội ngũ tư vấn viên Nội Thất Bảo Khang sẽ gọi điện trực tiếp để xác nhận và thông báo lịch giao hàng sớm nhất.</p>
             </div>
             
-            <div class="border-t border-stone-150 pt-6 space-y-4">
-                <p class="text-xs font-bold text-stone-700">CẦN HỖ TRỢ GẤP?</p>
+            <div class="border-t border-stone-200/50 pt-6 space-y-4">
+                <p class="text-2xs font-extrabold tracking-widest text-stone-700 uppercase">Cần Hỗ Trợ Gấp?</p>
                 <div class="flex flex-wrap justify-center gap-3">
-                    <a href="tel:{{ hotline }}" class="bg-red-650 hover:bg-red-750 text-white font-bold px-6 py-2.5 rounded-lg text-xs tracking-wider transition-colors shadow">
-                        <i class="fa-solid fa-phone mr-1"></i> GỌI HOTLINE: {{ hotline_display }}
+                    <a href="tel:{{ hotline }}" class="bg-red-600/90 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow">
+                        <i class="fa-solid fa-phone mr-1.5 animate-pulse"></i> Gọi ngay
                     </a>
-                    <a href="{{ zalo_link }}" target="_blank" class="bg-blue-650 hover:bg-blue-750 text-white font-bold px-6 py-2.5 rounded-lg text-xs tracking-wider transition-colors shadow">
-                        <i class="fa-solid fa-comments mr-1"></i> CHAT ZALO NHANH
+                    <a href="{{ zalo_link }}" target="_blank" class="bg-blue-650 hover:bg-blue-755 text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow">
+                        <i class="fa-solid fa-comments mr-1.5"></i> Chat Zalo
                     </a>
                 </div>
             </div>
 
             <div class="pt-4">
-                <a href="{{ url_for('index') }}" class="bg-stone-800 hover:bg-stone-900 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors">
-                    Về Trang Chủ
+                <a href="{{ url_for('index') }}" class="bg-stone-850 hover:bg-stone-900 text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-colors block text-center max-w-xs mx-auto active:scale-95">
+                    Quay về Trang Chủ
                 </a>
             </div>
         </div>
@@ -54,58 +54,58 @@
         <div class="space-y-8">
             <div>
                 <h1 class="text-3xl font-extrabold text-stone-900 font-heading">Thông Tin Giao Hàng</h1>
-                <p class="text-sm text-stone-500 mt-1">Vui lòng hoàn tất mẫu thông tin bên dưới để gửi yêu cầu đặt hàng.</p>
+                <p class="text-xs text-stone-500 uppercase tracking-widest font-bold mt-1">Hoàn thành thông tin đơn hàng dưới đây.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                 <!-- Customer Details Form (Left) -->
-                <form action="{{ url_for('checkout', action='place_order') }}" method="POST" class="md:col-span-7 bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
-                    <h3 class="text-stone-900 font-bold uppercase tracking-wider text-xs border-b border-stone-150 pb-2 font-heading">
+                <form action="{{ url_for('checkout', action='place_order') }}" method="POST" class="md:col-span-7 glass-panel p-6 rounded-2xl shadow-xl space-y-4">
+                    <h3 class="text-stone-900 font-extrabold uppercase tracking-widest text-[11px] border-b border-stone-200/50 pb-2.5 font-heading">
                         Chi Tiết Người Nhận
                     </h3>
                     
                     <div>
-                        <label for="customer_name" class="block text-xs font-semibold text-stone-700 mb-1">Họ và tên *</label>
+                        <label for="customer_name" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Họ và tên *</label>
                         <input type="text" name="customer_name" id="customer_name" required 
-                            class="w-full px-4 py-2.5 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"
                             placeholder="Nguyễn Văn A" value="{{ session.get('user_fullname', '') }}">
                     </div>
 
                     <div>
-                        <label for="customer_phone" class="block text-xs font-semibold text-stone-700 mb-1">Số điện thoại liên hệ *</label>
+                        <label for="customer_phone" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Số điện thoại liên hệ *</label>
                         <input type="text" name="customer_phone" id="customer_phone" required 
-                            class="w-full px-4 py-2.5 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"
                             placeholder="090xxxxxxxx" value="{{ session.get('user_phone', '') }}">
                     </div>
 
                     <div>
-                        <label for="customer_address" class="block text-xs font-semibold text-stone-700 mb-1">Địa chỉ nhận hàng *</label>
+                        <label for="customer_address" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Địa chỉ nhận hàng *</label>
                         <input type="text" name="customer_address" id="customer_address" required 
-                            class="w-full px-4 py-2.5 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
-                            placeholder="Nhập địa chỉ nhà cụ thể...">
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"
+                            placeholder="Số nhà, đường, phường/xã, quận/huyện...">
                     </div>
 
                     <div>
-                        <label for="note" class="block text-xs font-semibold text-stone-700 mb-1">Ghi chú thêm</label>
+                        <label for="note" class="block text-[10px] font-bold uppercase tracking-wider text-stone-700 mb-1">Ghi chú thêm</label>
                         <textarea name="note" id="note" rows="3" 
-                            class="w-full px-4 py-2.5 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent text-stone-900"
-                            placeholder="Kích thước mong muốn, yêu cầu giao hàng..."></textarea>
+                            class="w-full px-4 py-2.5 border border-stone-250 rounded-xl text-xs bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:border-transparent text-stone-900 font-semibold"
+                            placeholder="Kích thước, màu sắc mong muốn hoặc yêu cầu giờ giao hàng..."></textarea>
                     </div>
 
-                    <button type="submit" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3.5 rounded-lg text-sm tracking-wider uppercase font-heading transition-colors shadow">
-                        Gửi Yêu Cầu Đặt Hàng
+                    <button type="submit" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-3.5 rounded-xl text-xs tracking-wider uppercase font-heading transition-colors shadow-lg active:scale-[0.98]">
+                        Xác Nhận Đặt Hàng
                     </button>
                 </form>
 
                 <!-- Order items summary review (Right) -->
-                <div class="md:col-span-5 bg-stone-50 p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
-                    <h3 class="text-stone-955 font-bold uppercase tracking-wider text-xs border-b border-stone-200 pb-2 font-heading">
+                <div class="md:col-span-5 bg-white/40 border border-white/20 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h3 class="text-stone-955 font-extrabold uppercase tracking-widest text-[11px] border-b border-stone-200/50 pb-2.5 font-heading">
                         Sản Phẩm Đã Chọn
                     </h3>
                     
                     {% if session.get('cart') %}
                         {% set ns = namespace(total_cart_amount=0, has_real_prices=false) %}
-                        <div class="divide-y divide-stone-200 max-h-72 overflow-y-auto pr-2 no-scrollbar">
+                        <div class="divide-y divide-stone-200/60 max-h-72 overflow-y-auto pr-2 no-scrollbar">
                             {% for key, item in session.get('cart').items() %}
                                 {% if item.is_sale %}
                                     {% set ns.total_cart_amount = ns.total_cart_amount + (item.price * item.quantity) %}
@@ -115,11 +115,11 @@
                                     <div class="flex gap-2">
                                         <span class="text-stone-500 font-bold">{{ item.quantity }}x</span>
                                         <div class="space-y-0.5">
-                                            <span class="font-bold text-stone-900 line-clamp-1">{{ item.name }}</span>
-                                            <span class="text-stone-400 text-3xs font-semibold block">{{ item.code }}</span>
+                                            <span class="font-bold text-stone-900 line-clamp-1 leading-tight">{{ item.name }}</span>
+                                            <span class="text-stone-400 text-[10px] font-bold block">{{ item.code }}</span>
                                         </div>
                                     </div>
-                                    <span class="font-bold text-stone-850 flex-shrink-0">
+                                    <span class="font-extrabold text-stone-850 flex-shrink-0">
                                         {% if item.is_sale %}
                                             {{ format_price(item.price * item.quantity) }}
                                         {% else %}
@@ -130,14 +130,14 @@
                             {% endfor %}
                         </div>
 
-                        <div class="border-t border-stone-200 pt-4 space-y-2 text-xs">
-                            <div class="flex justify-between font-bold text-stone-900 text-sm">
-                                <span>Tổng cộng cần thanh toán:</span>
-                                <span class="text-base text-amber-800">
+                        <div class="border-t border-stone-200/50 pt-4 space-y-2 text-xs font-bold">
+                            <div class="flex justify-between items-baseline font-extrabold text-stone-900 text-sm">
+                                <span>Tổng cộng:</span>
+                                <span class="text-base text-amber-900">
                                     {% if ns.has_real_prices %}
                                         {{ format_price(ns.total_cart_amount) }}
                                     {% else %}
-                                        Liên hệ Hotline/Zalo
+                                        Liên hệ báo giá
                                     {% endif %}
                                 </span>
                             </div>
