@@ -197,6 +197,30 @@ def init_database():
         END
         """)
 
+        # ChatMessages table
+        cursor.execute("""
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[chat_messages]') AND type in (N'U'))
+        BEGIN
+            CREATE TABLE [dbo].[chat_messages] (
+                [id] INT IDENTITY(1,1) PRIMARY KEY,
+                [session_id] NVARCHAR(100) NOT NULL,
+                [sender_type] NVARCHAR(20) NOT NULL CHECK ([sender_type] IN ('customer', 'admin')),
+                [sender_name] NVARCHAR(100) DEFAULT NULL,
+                [message] NVARCHAR(MAX) NOT NULL,
+                [is_read] TINYINT DEFAULT 0,
+                [created_at] DATETIME DEFAULT GETDATE()
+            )
+        END
+        """)
+
+        # ChatMessages index
+        cursor.execute("""
+        IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_chat_messages_session' AND object_id = OBJECT_ID(N'[dbo].[chat_messages]'))
+        BEGIN
+            CREATE INDEX IX_chat_messages_session ON [dbo].[chat_messages] (session_id)
+        END
+        """)
+
         # Create default Admin if not exists
         cursor.execute("SELECT id FROM Users WHERE username = %s", ('admin',))
         if not cursor.fetchone():
@@ -1110,6 +1134,196 @@ def admin_users():
         flash(f"Lỗi tải danh sách: {e}", "error")
         
     return render_template('admin_users.html', users=users)
+
+# --- LIVE CHAT ENDPOINTS ---
+
+def get_current_chat_session():
+    if session.get('user_id'):
+        return {
+            'session_id': f"user_{session['user_id']}",
+            'name': session.get('user_fullname'),
+            'phone': session.get('user_phone', ''),
+            'is_logged_in': True
+        }
+    elif session.get('chat_session_id'):
+        return {
+            'session_id': session['chat_session_id'],
+            'name': session.get('chat_customer_name'),
+            'phone': session.get('chat_customer_phone', ''),
+            'is_logged_in': False
+        }
+    return None
+
+@app.route('/api/chat/register', methods=['POST'])
+def chat_register():
+    data = request.json or {}
+    name = data.get('name', '').strip()
+    phone = data.get('phone', '').strip()
+    if not name or not phone:
+        return jsonify({'success': False, 'message': 'Vui lòng nhập đầy đủ Họ tên và SĐT'}), 400
+    
+    import uuid
+    session['chat_session_id'] = f"guest_{uuid.uuid4().hex[:12]}"
+    session['chat_customer_name'] = name
+    session['chat_customer_phone'] = phone
+    
+    return jsonify({
+        'success': True,
+        'session_id': session['chat_session_id'],
+        'name': name,
+        'phone': phone
+    })
+
+@app.route('/api/chat/messages', methods=['GET'])
+def chat_get_messages():
+    session_id = request.args.get('session_id')
+    
+    if session_id:
+        if 'user_id' not in session or not session.get('is_admin'):
+            return jsonify({'success': False, 'message': 'Không có quyền truy cập'}), 403
+            
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(as_dict=True)
+            cursor.execute("""
+                UPDATE chat_messages 
+                SET is_read = 1 
+                WHERE session_id = %s AND sender_type = 'customer' AND is_read = 0
+            """, (session_id,))
+            
+            cursor.execute("""
+                SELECT id, session_id, sender_type, sender_name, message, is_read, 
+                       CONVERT(VARCHAR(19), created_at, 120) as created_at 
+                FROM chat_messages 
+                WHERE session_id = %s 
+                ORDER BY id ASC
+            """, (session_id,))
+            messages = cursor.fetchall()
+            conn.close()
+            return jsonify({'success': True, 'messages': messages})
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+    else:
+        chat_sess = get_current_chat_session()
+        if not chat_sess:
+            return jsonify({'success': True, 'messages': []})
+            
+        my_session_id = chat_sess['session_id']
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(as_dict=True)
+            cursor.execute("""
+                UPDATE chat_messages 
+                SET is_read = 1 
+                WHERE session_id = %s AND sender_type = 'admin' AND is_read = 0
+            """, (my_session_id,))
+            
+            cursor.execute("""
+                SELECT id, session_id, sender_type, sender_name, message, is_read, 
+                       CONVERT(VARCHAR(19), created_at, 120) as created_at 
+                FROM chat_messages 
+                WHERE session_id = %s 
+                ORDER BY id ASC
+            """, (my_session_id,))
+            messages = cursor.fetchall()
+            conn.close()
+            return jsonify({'success': True, 'messages': messages})
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/chat/send', methods=['POST'])
+def chat_send_message():
+    data = request.json or {}
+    message_text = data.get('message', '').strip()
+    if not message_text:
+        return jsonify({'success': False, 'message': 'Nội dung tin nhắn trống'}), 400
+        
+    target_session_id = data.get('session_id')
+    
+    if target_session_id:
+        if 'user_id' not in session or not session.get('is_admin'):
+            return jsonify({'success': False, 'message': 'Không có quyền truy cập'}), 403
+            
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(as_dict=True)
+            admin_name = session.get('user_fullname', 'Quản trị viên')
+            
+            cursor.execute("""
+                INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read) 
+                VALUES (%s, 'admin', %s, %s, 0)
+            """, (target_session_id, admin_name, message_text))
+            conn.close()
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+    else:
+        chat_sess = get_current_chat_session()
+        if not chat_sess:
+            return jsonify({'success': False, 'message': 'Chưa đăng ký phiên chat'}), 400
+            
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(as_dict=True)
+            cursor.execute("""
+                INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read) 
+                VALUES (%s, 'customer', %s, %s, 0)
+            """, (chat_sess['session_id'], chat_sess['name'], message_text))
+            conn.close()
+            return jsonify({'success': True})
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/chat/conversations', methods=['GET'])
+def chat_get_conversations():
+    if 'user_id' not in session or not session.get('is_admin'):
+        return jsonify({'success': False, 'message': 'Không có quyền truy cập'}), 403
+        
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("""
+            WITH LatestMessages AS (
+                SELECT 
+                    session_id,
+                    sender_type,
+                    sender_name,
+                    message,
+                    is_read,
+                    created_at,
+                    ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY id DESC) as rn
+                FROM chat_messages
+            ),
+            UnreadCounts AS (
+                SELECT 
+                    session_id,
+                    COUNT(*) as unread_count
+                FROM chat_messages
+                WHERE sender_type = 'customer' AND is_read = 0
+                GROUP BY session_id
+            )
+            SELECT 
+                lm.session_id,
+                lm.sender_type,
+                lm.sender_name,
+                lm.message,
+                CONVERT(VARCHAR(19), lm.created_at, 120) as created_at,
+                COALESCE(uc.unread_count, 0) as unread_count
+            FROM LatestMessages lm
+            LEFT JOIN UnreadCounts uc ON lm.session_id = uc.session_id
+            WHERE lm.rn = 1
+            ORDER BY lm.created_at DESC
+        """)
+        conversations = cursor.fetchall()
+        conn.close()
+        return jsonify({'success': True, 'conversations': conversations})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/admin/chat')
+def admin_chat():
+    if not check_admin_auth(): return redirect(url_for('login'))
+    return render_template('admin_chat.html')
 
 # Custom static routes to serve data and logo folders directly from workspace
 @app.route('/data/<path:filename>')

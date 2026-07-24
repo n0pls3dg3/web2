@@ -304,6 +304,273 @@
         </a>
     </div>
 
+    <!-- FLOATING LIVE CHAT WIDGET -->
+    <div class="live-chat-container">
+        <!-- Live Chat Dialog (Liquid Glass Style) -->
+        <div id="live-chat-box" class="live-chat-box glass-panel hidden">
+            <!-- Header -->
+            <div class="live-chat-header rounded-t-3xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    <div class="text-left">
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-white">Hỗ Trợ Bảo Khang</h4>
+                        <p class="text-[9px] text-white/70">Liên hệ trực tiếp với chúng tôi</p>
+                    </div>
+                </div>
+                <button id="live-chat-close" class="text-white hover:text-stone-250 text-xl font-bold transition-colors">&times;</button>
+            </div>
+            
+            <!-- Registration Form (shown if guest has no session info) -->
+            <div id="live-chat-register" class="live-chat-body flex flex-col justify-center p-5 space-y-4">
+                <p class="text-xs text-stone-600 text-center font-medium">Vui lòng nhập thông tin để bắt đầu trò chuyện trực tiếp:</p>
+                <input type="text" id="chat-reg-name" placeholder="Họ và tên..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-1 focus:ring-red-800 bg-white/50">
+                <input type="tel" id="chat-reg-phone" placeholder="Số điện thoại..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-1 focus:ring-red-800 bg-white/50">
+                <button id="chat-reg-submit" class="w-full text-xs font-bold py-2.5 text-white bg-red-800 rounded-xl hover:bg-red-900 transition-colors shadow-md">Bắt Đầu Trò Chuyện</button>
+            </div>
+            
+            <!-- Chat Feed (shown when session exists or registered) -->
+            <div id="live-chat-feed-wrapper" class="live-chat-body hidden flex-col">
+                <div id="live-chat-feed" class="flex-grow p-4 overflow-y-auto space-y-3 flex flex-col text-left">
+                    <!-- Messages will be loaded here dynamically -->
+                </div>
+                <div class="p-3 border-t border-stone-200/50 bg-white/20 flex gap-2 items-center">
+                    <input type="text" id="live-chat-input" placeholder="Nhập tin nhắn..." class="flex-grow text-xs px-3 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-1 focus:ring-red-800 bg-white/50">
+                    <button id="live-chat-send" class="w-9 h-9 flex items-center justify-center bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md transition-colors"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Toggle Button -->
+        <button id="live-chat-toggle" class="live-chat-toggle-btn" title="Chat trực tiếp với quản trị viên">
+            <span class="pulse-ring"></span>
+            <i class="fa-solid fa-headset text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Live Chat Client Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const IS_LOGGED_IN = {{ 'true' if session.get('user_id') else 'false' }};
+            let chatSessionId = "{{ session.get('chat_session_id', '') }}";
+            let customerName = "{{ session.get('user_fullname', session.get('chat_customer_name', '')) | escape }}";
+            let customerPhone = "{{ session.get('user_phone', session.get('chat_customer_phone', '')) | escape }}";
+            
+            const chatToggleBtn = document.getElementById('live-chat-toggle');
+            const chatBox = document.getElementById('live-chat-box');
+            const chatCloseBtn = document.getElementById('live-chat-close');
+            
+            const chatRegisterDiv = document.getElementById('live-chat-register');
+            const chatFeedWrapper = document.getElementById('live-chat-feed-wrapper');
+            const chatFeed = document.getElementById('live-chat-feed');
+            
+            const regNameInput = document.getElementById('chat-reg-name');
+            const regPhoneInput = document.getElementById('chat-reg-phone');
+            const regSubmitBtn = document.getElementById('chat-reg-submit');
+            
+            const chatInput = document.getElementById('live-chat-input');
+            const chatSendBtn = document.getElementById('live-chat-send');
+            
+            let pollInterval = null;
+            let lastMessageCount = -1;
+            
+            // Show/hide view based on session state
+            function updateChatUI() {
+                if (IS_LOGGED_IN || chatSessionId) {
+                    chatRegisterDiv.classList.add('hidden');
+                    chatFeedWrapper.classList.remove('hidden');
+                    chatFeedWrapper.classList.add('flex');
+                    if (!chatBox.classList.contains('hidden')) {
+                        startPolling();
+                    }
+                } else {
+                    chatRegisterDiv.classList.remove('hidden');
+                    chatFeedWrapper.classList.add('hidden');
+                    chatFeedWrapper.classList.remove('flex');
+                }
+            }
+            
+            // Toggle Chat Box
+            chatToggleBtn.addEventListener('click', () => {
+                chatBox.classList.toggle('hidden');
+                if (!chatBox.classList.contains('hidden')) {
+                    updateChatUI();
+                    // Clear unread badge
+                    const badge = document.getElementById('chat-unread-badge');
+                    if (badge) badge.remove();
+                    
+                    // Focus input if chat feed is shown
+                    if (IS_LOGGED_IN || chatSessionId) {
+                        setTimeout(() => chatInput.focus(), 150);
+                    }
+                } else {
+                    stopPolling();
+                }
+            });
+            
+            chatCloseBtn.addEventListener('click', () => {
+                chatBox.classList.add('hidden');
+                stopPolling();
+            });
+            
+            // Register Guest
+            regSubmitBtn.addEventListener('click', async () => {
+                const name = regNameInput.value.trim();
+                const phone = regPhoneInput.value.trim();
+                if (!name || !phone) {
+                    alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại.');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch('/api/chat/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, phone })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        chatSessionId = data.session_id;
+                        customerName = data.name;
+                        customerPhone = data.phone;
+                        updateChatUI();
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Không thể kết nối đến máy chủ.');
+                }
+            });
+            
+            // Send Message
+            async function sendMessage() {
+                const msg = chatInput.value.trim();
+                if (!msg) return;
+                
+                chatInput.value = '';
+                try {
+                    const res = await fetch('/api/chat/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        loadMessages(); // Load immediately
+                    } else {
+                        console.error(data.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            
+            chatSendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            // Load Messages
+            async function loadMessages() {
+                if (!IS_LOGGED_IN && !chatSessionId) return;
+                
+                try {
+                    const res = await fetch('/api/chat/messages');
+                    const data = await res.json();
+                    if (data.success) {
+                        renderMessages(data.messages);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            
+            // Render Messages
+            function renderMessages(messages) {
+                if (messages.length === lastMessageCount && chatFeed.children.length > 0) {
+                    return;
+                }
+                
+                chatFeed.innerHTML = '';
+                messages.forEach(msg => {
+                    const isCustomer = msg.sender_type === 'customer';
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `chat-msg ${isCustomer ? 'chat-msg-customer' : 'chat-msg-admin'}`;
+                    
+                    let timeStr = '';
+                    if (msg.created_at) {
+                        const parts = msg.created_at.split(' ');
+                        if (parts.length > 1) {
+                            timeStr = parts[1].substring(0, 5);
+                        }
+                    }
+                    
+                    msgDiv.innerHTML = `
+                        <div class="font-semibold text-[11px] opacity-75 mb-0.5">${escapeHTML(msg.sender_name)}</div>
+                        <div class="text-[12px] whitespace-pre-wrap">${escapeHTML(msg.message)}</div>
+                        <span class="chat-msg-time text-right">${timeStr}</span>
+                    `;
+                    chatFeed.appendChild(msgDiv);
+                });
+                
+                chatFeed.scrollTop = chatFeed.scrollHeight;
+                lastMessageCount = messages.length;
+            }
+            
+            function escapeHTML(str) {
+                return str.replace(/[&<>'"]/g, 
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
+            }
+            
+            function startPolling() {
+                stopPolling();
+                loadMessages();
+                pollInterval = setInterval(loadMessages, 2500);
+            }
+            
+            function stopPolling() {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+            }
+            
+            // Background check for unread messages count
+            async function checkUnreadBackground() {
+                if (chatBox.classList.contains('hidden') && (IS_LOGGED_IN || chatSessionId)) {
+                    try {
+                        const res = await fetch('/api/chat/messages');
+                        const data = await res.json();
+                        if (data.success && data.messages) {
+                            const unreadCount = data.messages.filter(m => m.sender_type === 'admin' && m.is_read === 0).length;
+                            
+                            let badge = document.getElementById('chat-unread-badge');
+                            if (unreadCount > 0) {
+                                if (!badge) {
+                                    badge = document.createElement('span');
+                                    badge.id = 'chat-unread-badge';
+                                    badge.className = 'absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-[9px] font-extrabold leading-none text-white bg-red-650 rounded-full border border-white shadow';
+                                    chatToggleBtn.appendChild(badge);
+                                }
+                                badge.textContent = unreadCount;
+                            } else if (badge) {
+                                badge.remove();
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+            
+            // Initial run
+            updateChatUI();
+            setInterval(checkUnreadBackground, 5000);
+            checkUnreadBackground();
+        });
+    </script>
+
     <!-- General Mobile Drawer Toggle Script -->
     <script>
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');

@@ -49,6 +49,13 @@
                     <span>Tài Khoản</span>
                 </div>
             </a>
+
+            <a href="{{ url_for('admin_chat') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-comments text-base w-5 text-stone-400"></i>
+                    <span>Quản Lý Chat</span>
+                </div>
+            </a>
         </nav>
 
         <div class="border-t border-white/10 p-4 flex items-center justify-between text-2xs font-bold">
@@ -125,7 +132,7 @@
                                             
                                             <td class="py-4 px-6 space-y-3 font-semibold">
                                                 <div class="divide-y divide-stone-200/40 bg-white/40 p-3 rounded-xl border border-white/30 shadow-inner">
-                                                    {% for item in ord.items %}
+                                                    {% for item in ord['items'] %}
                                                         <div class="py-1.5 flex justify-between gap-4">
                                                             <span>
                                                                 <strong class="font-bold text-amber-900">[{{ item.code if item.code else 'N/A' }}]</strong>

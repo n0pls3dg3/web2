@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Chat - {{ brand_name }}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="text-stone-850 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar Navigation (Dark Glassmorphism) -->
+    <aside class="w-full md:w-64 glass-panel-dark text-stone-300 flex-shrink-0 flex flex-col border-r border-white/10 relative z-30">
+        <div class="h-20 flex items-center justify-center border-b border-white/10 px-6 gap-3">
+            <img class="h-10 w-auto object-contain bg-white/10 p-1 rounded-xl border border-white/20" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
+            <div class="flex flex-col">
+                <span class="text-white text-sm font-extrabold font-heading leading-tight">{{ brand_name }}</span>
+                <span class="text-[9px] uppercase tracking-widest text-amber-500 font-bold leading-none">ADMIN PANEL</span>
+            </div>
+        </div>
+        
+        <nav class="flex-grow py-6 px-4 space-y-2 text-xs font-bold uppercase tracking-wider">
+            <a href="{{ url_for('admin_dashboard') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-chart-line text-base w-5 text-stone-400"></i>
+                    <span>Thống Kê</span>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('admin_orders') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-receipt text-base w-5 text-stone-400"></i>
+                    <span>Đơn Hàng</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_products') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-couch text-base w-5 text-stone-400"></i>
+                    <span>Sản Phẩm</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_users') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all text-stone-300 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-users-gear text-base w-5 text-stone-400"></i>
+                    <span>Tài Khoản</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_chat') }}" class="flex items-center justify-between px-4 py-3.5 rounded-xl transition-all bg-white/10 text-white border border-white/10 shadow-md">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-comments text-base w-5 text-amber-500"></i>
+                    <span>Quản Lý Chat</span>
+                </div>
+            </a>
+        </nav>
+
+        <div class="border-t border-white/10 p-4 flex items-center justify-between text-2xs font-bold">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-bold border border-amber-500/20">
+                    A
+                </div>
+                <div>
+                    <span class="text-stone-250 block leading-tight">{{ session.get('user_fullname', 'Quản trị viên') }}</span>
+                    <span class="text-stone-500 text-[9px] uppercase tracking-widest block mt-0.5">Administrator</span>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="text-stone-500 hover:text-red-500 transition-colors" title="Đăng xuất">
+                <i class="fa-solid fa-right-from-bracket text-sm"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Content Workspace -->
+    <div class="flex-grow flex flex-col min-w-0">
+        <header class="h-20 bg-white/40 border-b border-stone-200/50 flex items-center justify-between px-8 backdrop-blur-md">
+            <div class="flex items-center gap-2 text-stone-500 font-bold text-[10px] uppercase tracking-widest">
+                <a href="{{ url_for('index') }}" target="_blank" class="hover:text-amber-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-globe"></i> Xem trang bán hàng <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-grow p-8 flex flex-col h-[calc(100vh-80px)] overflow-hidden">
+            <div class="mb-6 flex-shrink-0">
+                <h1 class="text-3xl font-extrabold text-stone-900 font-heading">Quản Lý Chat Trực Tuyến</h1>
+                <p class="text-xs text-stone-500 uppercase tracking-widest font-bold mt-1">Hỗ trợ và phản hồi tin nhắn từ khách hàng trong thời gian thực.</p>
+            </div>
+
+            <!-- Chat Console Grid -->
+            <div class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-0 mb-4">
+                <!-- Conversations List Panel -->
+                <div class="lg:col-span-1 glass-panel bg-white/60 rounded-2xl shadow-xl flex flex-col min-h-0">
+                    <div class="h-16 px-6 border-b border-stone-200/50 flex items-center justify-between flex-shrink-0 bg-white/10">
+                        <h3 class="font-bold text-stone-950 font-heading text-sm uppercase tracking-wider">Hội Thoại</h3>
+                        <button id="refresh-convs" class="text-stone-500 hover:text-red-800 transition-colors" title="Tải lại danh sách">
+                            <i class="fa-solid fa-rotate text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="conversations-list" class="flex-grow overflow-y-auto divide-y divide-stone-200/50">
+                        <div class="p-6 text-center text-xs text-stone-500 italic">Đang tải danh sách cuộc trò chuyện...</div>
+                    </div>
+                </div>
+
+                <!-- Chat Feed Panel -->
+                <div class="lg:col-span-2 glass-panel bg-white/60 rounded-2xl shadow-xl flex flex-col min-h-0 relative">
+                    <!-- Default Screen when no chat is selected -->
+                    <div id="chat-placeholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-white/40 rounded-2xl">
+                        <div class="w-16 h-16 rounded-2xl bg-red-800/10 text-red-800 flex items-center justify-center text-2xl border border-red-800/20 mb-4 animate-bounce">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h3 class="font-extrabold text-stone-850 text-sm uppercase tracking-wider">Chọn Cuộc Trò Chuyện</h3>
+                        <p class="text-xs text-stone-500 mt-1 max-w-xs">Chọn một khách hàng ở danh sách bên trái để xem lịch sử và gửi tin nhắn hỗ trợ trực tiếp.</p>
+                    </div>
+
+                    <!-- Main Chat Panel -->
+                    <div id="chat-main" class="flex flex-col h-full hidden">
+                        <!-- Chat Header -->
+                        <div class="h-16 px-6 border-b border-stone-200/50 flex items-center justify-between flex-shrink-0 bg-white/20">
+                            <div class="text-left">
+                                <h4 id="chat-title-name" class="font-extrabold text-stone-900 text-sm leading-tight">...</h4>
+                                <span id="chat-title-session" class="text-[10px] text-stone-500 font-semibold block mt-0.5">...</span>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Feed -->
+                        <div id="admin-chat-feed" class="flex-grow p-6 overflow-y-auto space-y-4 flex flex-col bg-white/10">
+                            <!-- Messages render dynamically here -->
+                        </div>
+
+                        <!-- Chat Message Input Footer -->
+                        <div class="p-4 border-t border-stone-200/50 bg-white/30 flex gap-3 items-center flex-shrink-0">
+                            <input type="text" id="admin-chat-input" placeholder="Nhập câu trả lời cho khách hàng..." 
+                                class="flex-grow text-sm px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-red-800 focus:bg-white bg-white/50 transition-all">
+                            <button id="admin-chat-send" class="px-5 py-3 bg-red-800 hover:bg-red-900 text-white font-bold rounded-xl shadow-lg flex items-center gap-2 transition-all">
+                                <i class="fa-solid fa-paper-plane text-xs"></i> <span>Gửi</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Admin Chat Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const convsList = document.getElementById('conversations-list');
+            const refreshConvsBtn = document.getElementById('refresh-convs');
+            
+            const chatPlaceholder = document.getElementById('chat-placeholder');
+            const chatMain = document.getElementById('chat-main');
+            const chatTitleName = document.getElementById('chat-title-name');
+            const chatTitleSession = document.getElementById('chat-title-session');
+            
+            const chatFeed = document.getElementById('admin-chat-feed');
+            const chatInput = document.getElementById('admin-chat-input');
+            const chatSendBtn = document.getElementById('admin-chat-send');
+            
+            let activeSessionId = null;
+            let activeCustomerName = null;
+            
+            let pollInterval = null;
+            let convsPollInterval = null;
+            let lastMessageCount = -1;
+
+            // Load all active conversations
+            async function loadConversations() {
+                try {
+                    const res = await fetch('/api/chat/conversations');
+                    const data = await res.json();
+                    if (data.success) {
+                        renderConversations(data.conversations);
+                    }
+                } catch (e) {
+                    console.error('Error fetching conversations:', e);
+                }
+            }
+
+            // Render Conversations List
+            function renderConversations(conversations) {
+                if (conversations.length === 0) {
+                    convsList.innerHTML = '<div class="p-6 text-center text-xs text-stone-500 italic">Chưa có cuộc trò chuyện nào.</div>';
+                    return;
+                }
+
+                convsList.innerHTML = '';
+                conversations.forEach(c => {
+                    const isActive = c.session_id === activeSessionId;
+                    const item = document.createElement('div');
+                    item.className = `p-4 flex items-center justify-between cursor-pointer border-b border-stone-200/40 hover:bg-white/40 transition-colors ${isActive ? 'bg-red-800/10 border-l-4 border-l-red-800 hover:bg-red-800/10' : ''}`;
+                    
+                    const name = c.sender_name || 'Khách vãng lai';
+                    const msgSnippet = c.message.length > 35 ? c.message.substring(0, 35) + '...' : c.message;
+                    
+                    let timeStr = '';
+                    if (c.created_at) {
+                        const parts = c.created_at.split(' ');
+                        timeStr = parts.length > 1 ? parts[1].substring(0, 5) : '';
+                    }
+
+                    item.innerHTML = `
+                        <div class="flex-grow min-w-0 pr-3 text-left">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-xs text-stone-900 truncate">${escapeHTML(name)}</h4>
+                                <span class="text-[9px] text-stone-450 font-semibold">${timeStr}</span>
+                            </div>
+                            <p class="text-[11px] text-stone-500 truncate mt-1 ${c.unread_count > 0 ? 'font-bold text-red-950' : ''}">
+                                ${c.sender_type === 'admin' ? '<span class="text-red-750 font-bold">Bạn:</span> ' : ''}${escapeHTML(msgSnippet)}
+                            </p>
+                        </div>
+                        ${c.unread_count > 0 ? `
+                            <span class="flex-shrink-0 bg-red-800 text-white font-extrabold text-[9px] w-5 h-5 flex items-center justify-center rounded-full shadow">
+                                ${c.unread_count}
+                            </span>
+                        ` : ''}
+                    `;
+                    
+                    item.addEventListener('click', () => selectConversation(c.session_id, name));
+                    convsList.appendChild(item);
+                });
+            }
+
+            // Select a conversation to view chat
+            function selectConversation(sessionId, customerName) {
+                activeSessionId = sessionId;
+                activeCustomerName = customerName;
+                lastMessageCount = -1;
+                
+                chatPlaceholder.classList.add('hidden');
+                chatMain.classList.remove('hidden');
+                
+                chatTitleName.textContent = customerName;
+                chatTitleSession.textContent = `Mã phiên: ${sessionId}`;
+                
+                // Update lists and active classes
+                loadConversations();
+                
+                // Load messages immediately & start polling
+                loadActiveChatMessages();
+                startChatPolling();
+            }
+
+            // Load messages of active chat
+            async function loadActiveChatMessages() {
+                if (!activeSessionId) return;
+                
+                try {
+                    const res = await fetch(`/api/chat/messages?session_id=${encodeURIComponent(activeSessionId)}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        renderActiveChatMessages(data.messages);
+                    }
+                } catch (e) {
+                    console.error('Error fetching messages:', e);
+                }
+            }
+
+            // Render Messages inside active chat feed
+            function renderActiveChatMessages(messages) {
+                if (messages.length === lastMessageCount && chatFeed.children.length > 0) {
+                    return;
+                }
+
+                chatFeed.innerHTML = '';
+                messages.forEach(msg => {
+                    const isAdmin = msg.sender_type === 'admin';
+                    
+                    const container = document.createElement('div');
+                    container.className = `flex w-full ${isAdmin ? 'justify-end' : 'justify-start'}`;
+
+                    const bubble = document.createElement('div');
+                    bubble.className = `max-w-[70%] p-3.5 rounded-2xl shadow-sm text-xs leading-relaxed text-left ${
+                        isAdmin 
+                            ? 'bg-red-800 text-white rounded-tr-none' 
+                            : 'bg-white text-stone-850 border border-stone-200/50 rounded-tl-none'
+                    }`;
+
+                    let timeStr = '';
+                    if (msg.created_at) {
+                        const parts = msg.created_at.split(' ');
+                        timeStr = parts.length > 1 ? parts[1].substring(0, 5) : '';
+                    }
+
+                    bubble.innerHTML = `
+                        <div class="font-extrabold text-[10px] uppercase tracking-wider mb-1 ${isAdmin ? 'text-red-100' : 'text-stone-400'}">
+                            ${escapeHTML(msg.sender_name)}
+                        </div>
+                        <div class="whitespace-pre-wrap">${escapeHTML(msg.message)}</div>
+                        <div class="text-[8px] mt-1.5 opacity-60 text-right font-semibold">${timeStr}</div>
+                    `;
+
+                    container.appendChild(bubble);
+                    chatFeed.appendChild(container);
+                });
+
+                chatFeed.scrollTop = chatFeed.scrollHeight;
+                lastMessageCount = messages.length;
+            }
+
+            // Send Response Message
+            async function sendAdminMessage() {
+                const msg = chatInput.value.trim();
+                if (!msg || !activeSessionId) return;
+
+                chatInput.value = '';
+                try {
+                    const res = await fetch('/api/chat/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: activeSessionId, message: msg })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        loadActiveChatMessages();
+                        loadConversations();
+                    }
+                } catch (e) {
+                    console.error('Error sending message:', e);
+                }
+            }
+
+            chatSendBtn.addEventListener('click', sendAdminMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendAdminMessage();
+            });
+
+            refreshConvsBtn.addEventListener('click', loadConversations);
+
+            function startChatPolling() {
+                if (pollInterval) clearInterval(pollInterval);
+                pollInterval = setInterval(loadActiveChatMessages, 2500);
+            }
+
+            function startConvsPolling() {
+                if (convsPollInterval) clearInterval(convsPollInterval);
+                convsPollInterval = setInterval(loadConversations, 3000);
+            }
+
+            function escapeHTML(str) {
+                return str.replace(/[&<>'"]/g, 
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
+            }
+
+            // Startup
+            loadConversations();
+            startConvsPolling();
+        });
+    </script>
+</body>
+</html>

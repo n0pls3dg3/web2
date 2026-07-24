@@ -102,3 +102,20 @@ BEGIN
     )
 END;
 GO
+
+-- 8. Table chat_messages
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[chat_messages]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [dbo].[chat_messages] (
+        [id] INT IDENTITY(1,1) PRIMARY KEY,
+        [session_id] NVARCHAR(100) NOT NULL,
+        [sender_type] NVARCHAR(20) NOT NULL CHECK ([sender_type] IN ('customer', 'admin')),
+        [sender_name] NVARCHAR(100) DEFAULT NULL,
+        [message] NVARCHAR(MAX) NOT NULL,
+        [is_read] TINYINT DEFAULT 0,
+        [created_at] DATETIME DEFAULT GETDATE()
+    );
+    CREATE INDEX IX_chat_messages_session ON [dbo].[chat_messages] (session_id);
+END;
+GO
+
