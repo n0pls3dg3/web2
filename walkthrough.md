@@ -3,7 +3,12 @@
 Hệ thống **Nội Thất Bảo Khang** đã hoàn thành đợt nâng cấp toàn diện bao gồm:
 1. **Live Chat Hình Ảnh**: Gửi/nhận ảnh trực quan, phóng to Lightbox.
 2. **Quản Lý Đoạn Chat**: Xóa lịch sử chat phía Khách hàng (Trò chuyện mới) và phía Admin (Xóa cuộc hội thoại).
-3. **Mục Video Công Trình Thực Tế**: Tự động quét, hiển thị danh sách video, phân trang tối đa 10 video và phát video bằng Lightbox.
+3. **Mục Video Công Trình Thực Tế**: Tự động quét, hiển thị danh sách video, phân trang tối đa 12 video và phát video bằng Lightbox.
+4. **Tối ưu hóa giao diện di động & Khắc phục lỗi**:
+   - Sửa lỗi đè chữ vào icon ở ô nhập liệu đăng nhập/đăng ký.
+   - Sửa lỗi hiển thị nút hamburger menu (3 gạch) trên di động.
+   - Sửa lỗi hiển thị nút "Tiếp tục mua sắm" bị màu trắng trên nền trắng ở giỏ hàng trống.
+   - Bổ sung cấu hình email `noithatbaokhang@gmail.com` đồng bộ hiển thị lên website.
 
 ---
 
@@ -51,7 +56,18 @@ Hệ thống **Nội Thất Bảo Khang** đã hoàn thành đợt nâng cấp t
   - Thiết kế Liquid Glass / Apple Style sang trọng: Thẻ video kính mờ bo tròn góc rộng, hiệu ứng hover chuyển động mượt mà.
   - Tích hợp xem trực tiếp tại chỗ bằng HTML5 Video Player hoặc click nút phóng to để mở Trình xem Video Lightbox Modal khổ lớn mờ nền ấn tượng.
 - **Quy tắc phân trang**:
-  - Phân trang hiển thị chính xác tối đa **10 video trên một trang**, hỗ trợ thanh điều hướng thông minh rút gọn dạng dấu ba chấm `...` cực đẹp.
+  - Phân trang hiển thị chính xác tối đa **12 video trên một trang**, hỗ trợ thanh điều hướng thông minh rút gọn dạng dấu ba chấm `...` cực đẹp.
+
+### 4. Tối ưu hóa UI/UX di động & Khắc phục lỗi
+- **Sửa lỗi đè chữ vào icon tại trang Đăng nhập / Đăng ký**:
+  - Cập nhật quy tắc ghi đè padding input trên di động trong `style.css` từ `input` thành `input:not(.pl-10)`. Nhờ đó, các input có icon (như tài khoản, mật khẩu, số điện thoại) giữ nguyên được khoảng cách đệm `pl-10` và không bị đè lên icon tuyệt đối.
+- **Sửa lỗi ẩn dấu 3 gạch (Menu di động)**:
+  - Ẩn nút "Đăng nhập" ở thanh Header chính khi xem trên di động (`hidden md:block`), thay vào đó tích hợp khối Đăng nhập / Thông tin cá nhân nằm gọn gàng ở **chân của Drawer Menu di động**.
+  - Nhờ giảm tải thành phần thừa trên thanh Header di động, nút dấu 3 gạch (Hamburger Menu) đã hiển thị đầy đủ, ngay ngắn cạnh Giỏ hàng.
+- **Sửa lỗi nút Tiếp tục mua sắm ở Giỏ hàng trống**:
+  - Khắc phục lỗi chính tả trong class màu nền của nút từ `bg-amber-755` thành `bg-amber-800` (màu hợp lệ trong Tailwind CSS). Nút mua sắm giờ có nền màu hổ phách sang trọng nổi bật thay vì nền trắng tàng hình.
+- **Đồng bộ Email thông tin liên lạc**:
+  - Đưa cấu hình `email_receiver` (`noithatbaokhang@gmail.com`) vào bộ context processor của Flask để đồng bộ hóa hiển thị địa chỉ email liên hệ trên toàn bộ hệ thống (Thanh Topbar, chân trang Footer).
 
 ---
 

@@ -391,7 +391,7 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     /* Quick order inputs on mobile */
-    input, textarea, select {
+    input:not(.pl-10), textarea, select {
         padding: 0.5rem 0.75rem !important;
         font-size: 11px !important;
         border-radius: 0.5rem !important;

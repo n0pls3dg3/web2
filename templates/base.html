@@ -32,7 +32,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <!-- Brand Logo & Name -->
-                <div class="flex-shrink-0 flex items-center gap-3">
+                <div class="flex-shrink-0 flex items-center gap-3 mr-8">
                     <a href="{{ url_for('index') }}" class="flex items-center gap-3">
                         <img class="h-12 w-auto object-contain rounded-xl bg-white/40 p-0.5 border border-white/50" src="/{{ get_logo_path() }}" alt="{{ brand_name }}">
                         <div class="flex flex-col">
@@ -43,7 +43,7 @@
                 </div>
 
                 <!-- Desktop Navigation Menu -->
-                <nav class="hidden md:flex space-x-6 items-center flex-shrink-0">
+                <nav class="hidden md:flex space-x-6 items-center flex-shrink-0 mr-6">
                     <a href="{{ url_for('index') }}" class="text-sm font-bold text-stone-700 hover:text-amber-900 transition-colors py-2 whitespace-nowrap">Trang Chủ</a>
                     
                     {% if nav_categories %}
@@ -98,7 +98,7 @@
                     </a>
 
                     <!-- User Account / Admin Panel Link -->
-                    <div class="relative group">
+                    <div class="hidden md:block relative group">
                         {% if session.get('user_id') %}
                             <button class="flex items-center gap-2 p-2 text-stone-650 hover:text-amber-900 transition-colors rounded-full hover:bg-white/40 border border-transparent hover:border-white/50">
                                 <i class="fa-regular fa-user text-lg"></i>
@@ -173,9 +173,38 @@
                     <i class="fa-solid fa-fire text-xs"></i> Khuyến Mãi
                 </a>
                 <a href="{{ url_for('construction_videos') }}" class="text-stone-700 hover:text-amber-850 py-1.5 flex items-center gap-1 border-t border-stone-100/50 pt-2.5">
-                    <i class="fa-solid fa-circle-play text-xs text-stone-500"></i> Công Trình Thực Tế
+                    <i class="fa-solid fa-circle-play text-xs text-stone-550"></i> Công Trình Thực Tế
                 </a>
             </nav>
+
+            <!-- User Account inside mobile drawer -->
+            <div class="pt-6 border-t border-stone-200/50 space-y-4">
+                {% if session.get('user_id') %}
+                    <div class="flex items-center justify-between bg-stone-50 p-3 rounded-2xl border border-stone-200/40">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-amber-800 text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                                {{ session.get('user_fullname', 'U')[0] }}
+                            </div>
+                            <div class="text-left">
+                                <span class="text-stone-850 text-xs font-bold block leading-tight truncate max-w-[130px]">{{ session.get('user_fullname') }}</span>
+                                {% if session.get('is_admin') %}
+                                    <span class="text-[8px] uppercase tracking-widest text-amber-700 font-extrabold block mt-0.5">Admin</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex gap-1.5">
+                            {% if session.get('is_admin') %}
+                                <a href="{{ url_for('admin_dashboard') }}" class="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 flex items-center justify-center border border-amber-200/20 transition-all shadow-sm" title="Quản trị"><i class="fa-solid fa-user-shield text-[10px]"></i></a>
+                            {% endif %}
+                            <a href="{{ url_for('logout') }}" class="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 text-red-650 flex items-center justify-center border border-red-200/20 transition-all shadow-sm" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket text-[10px]"></i></a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="w-full py-2.5 text-xs font-bold text-white bg-amber-800 hover:bg-amber-900 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i> Đăng Nhập
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 

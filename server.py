@@ -74,7 +74,8 @@ def utility_processor():
         facebook_link=FACEBOOK_LINK,
         factory_address=FACTORY_ADDRESS,
         office_address=OFFICE_ADDRESS,
-        standard_description=STANDARD_DESCRIPTION
+        standard_description=STANDARD_DESCRIPTION,
+        email_receiver=EMAIL_RECEIVER
     )
 
 # 1. Database and Tables Initialization
