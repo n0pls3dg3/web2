@@ -470,11 +470,12 @@ def index():
         """)
         sale_products = cursor.fetchall()[:4]
 
-        # 2. Fetch latest products
+        # 2. Fetch Bàn học sinh products for featured section
         cursor.execute("""
             SELECT p.*, (SELECT TOP 1 image_path FROM ProductImages WHERE product_id = p.id) as image_path 
             FROM Products p 
-            WHERE p.is_sale = 0 
+            INNER JOIN Categories c ON p.category_id = c.id
+            WHERE c.slug = 'ban-hoc-sinh'
             ORDER BY p.id DESC
         """)
         latest_products = cursor.fetchall()[:8]
