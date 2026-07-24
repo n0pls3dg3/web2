@@ -121,3 +121,15 @@ BEGIN
 END;
 GO
 
+-- 9. Table construction_videos
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[construction_videos]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [dbo].[construction_videos] (
+        [id] INT IDENTITY(1,1) PRIMARY KEY,
+        [video_path] NVARCHAR(255) NOT NULL UNIQUE,
+        [video_name] NVARCHAR(255) NOT NULL,
+        [created_at] DATETIME DEFAULT GETDATE()
+    )
+END;
+GO
+

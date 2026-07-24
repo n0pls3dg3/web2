@@ -43,13 +43,13 @@
                 </div>
 
                 <!-- Desktop Navigation Menu -->
-                <nav class="hidden md:flex space-x-8 items-center">
-                    <a href="{{ url_for('index') }}" class="text-sm font-bold text-stone-700 hover:text-amber-900 transition-colors py-2">Trang Chủ</a>
+                <nav class="hidden md:flex space-x-6 items-center flex-shrink-0">
+                    <a href="{{ url_for('index') }}" class="text-sm font-bold text-stone-700 hover:text-amber-900 transition-colors py-2 whitespace-nowrap">Trang Chủ</a>
                     
                     {% if nav_categories %}
                         {% for parent in nav_categories %}
-                            <div class="relative group py-2">
-                                <a href="{{ url_for('category', slug=parent.slug) }}" class="text-sm font-bold text-stone-700 hover:text-amber-900 transition-colors flex items-center gap-1">
+                            <div class="relative group py-2 flex-shrink-0">
+                                <a href="{{ url_for('category', slug=parent.slug) }}" class="text-sm font-bold text-stone-700 hover:text-amber-900 transition-colors flex items-center gap-1 whitespace-nowrap">
                                     {{ parent.name }}
                                     <i class="fa-solid fa-chevron-down text-[10px] text-stone-400 group-hover:text-amber-900 transition-transform duration-300 group-hover:rotate-180"></i>
                                 </a>
@@ -68,8 +68,11 @@
                         {% endfor %}
                     {% endif %}
 
-                    <a href="{{ url_for('category', sale=1) }}" class="text-sm font-bold text-red-650 hover:text-red-700 transition-colors py-2 flex items-center gap-1">
+                    <a href="{{ url_for('category', sale=1) }}" class="text-sm font-bold text-red-650 hover:text-red-700 transition-colors py-2 flex items-center gap-1 whitespace-nowrap">
                         <i class="fa-solid fa-fire text-xs"></i> Khuyến Mãi
+                    </a>
+                    <a href="{{ url_for('construction_videos') }}" class="text-sm font-bold text-stone-700 hover:text-amber-900 transition-colors py-2 flex items-center gap-1 whitespace-nowrap">
+                        <i class="fa-solid fa-circle-play text-xs text-stone-550"></i> Thực Tế
                     </a>
                 </nav>
 
@@ -168,6 +171,9 @@
                 {% endif %}
                 <a href="{{ url_for('category', sale=1) }}" class="text-red-655 hover:text-red-700 py-1.5 flex items-center gap-1">
                     <i class="fa-solid fa-fire text-xs"></i> Khuyến Mãi
+                </a>
+                <a href="{{ url_for('construction_videos') }}" class="text-stone-700 hover:text-amber-850 py-1.5 flex items-center gap-1 border-t border-stone-100/50 pt-2.5">
+                    <i class="fa-solid fa-circle-play text-xs text-stone-500"></i> Công Trình Thực Tế
                 </a>
             </nav>
         </div>
@@ -309,7 +315,7 @@
         <!-- Live Chat Dialog (Liquid Glass Style) -->
         <div id="live-chat-box" class="live-chat-box glass-panel hidden">
             <!-- Header -->
-            <div class="live-chat-header rounded-t-3xl">
+            <div class="live-chat-header rounded-t-3xl flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                     <div class="text-left">
@@ -317,7 +323,10 @@
                         <p class="text-[9px] text-white/70">Liên hệ trực tiếp với chúng tôi</p>
                     </div>
                 </div>
-                <button id="live-chat-close" class="text-white hover:text-stone-250 text-xl font-bold transition-colors">&times;</button>
+                <div class="flex items-center gap-2">
+                    <button id="live-chat-clear" class="text-white/75 hover:text-white text-xs font-bold transition-colors hidden mr-1" title="Xóa lịch sử chat / Trò chuyện mới"><i class="fa-regular fa-trash-can text-sm"></i></button>
+                    <button id="live-chat-close" class="text-white hover:text-stone-250 text-xl font-bold transition-colors leading-none">&times;</button>
+                </div>
             </div>
             
             <!-- Registration Form (shown if guest has no session info) -->
@@ -366,6 +375,7 @@
             const chatToggleBtn = document.getElementById('live-chat-toggle');
             const chatBox = document.getElementById('live-chat-box');
             const chatCloseBtn = document.getElementById('live-chat-close');
+            const chatClearBtn = document.getElementById('live-chat-clear');
             
             const chatRegisterDiv = document.getElementById('live-chat-register');
             const chatFeedWrapper = document.getElementById('live-chat-feed-wrapper');
@@ -389,6 +399,7 @@
                     chatRegisterDiv.classList.add('hidden');
                     chatFeedWrapper.classList.remove('hidden');
                     chatFeedWrapper.classList.add('flex');
+                    chatClearBtn.classList.remove('hidden');
                     if (!chatBox.classList.contains('hidden')) {
                         startPolling();
                     }
@@ -396,6 +407,7 @@
                     chatRegisterDiv.classList.remove('hidden');
                     chatFeedWrapper.classList.add('hidden');
                     chatFeedWrapper.classList.remove('flex');
+                    chatClearBtn.classList.add('hidden');
                 }
             }
             
@@ -475,6 +487,35 @@
                 }
             }
             
+            // Clear Chat Handler
+            chatClearBtn.addEventListener('click', async () => {
+                if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện và bắt đầu cuộc hội thoại mới?")) return;
+                
+                try {
+                    const res = await fetch('/api/chat/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: chatSessionId })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        chatSessionId = "";
+                        customerName = "";
+                        customerPhone = "";
+                        regNameInput.value = "";
+                        regPhoneInput.value = "";
+                        chatFeed.innerHTML = "";
+                        lastMessageCount = -1;
+                        updateChatUI();
+                    } else {
+                        alert(data.message || "Không thể xóa lịch sử chat.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Lỗi kết nối mạng.");
+                }
+            });
+
             // File Attachment Handlers
             chatAttachBtn.addEventListener('click', () => {
                 chatFileInput.click();

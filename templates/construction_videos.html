@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Hình Ảnh & Video Công Trình Thực Tế - {{ brand_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-br from-stone-50 via-stone-100 to-amber-50/20 py-12 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <div class="mb-10 text-center space-y-4">
+            <span class="text-amber-850 font-extrabold uppercase tracking-widest text-[10px] sm:text-xs bg-amber-850/10 px-3.5 py-1.5 rounded-full border border-amber-800/20 shadow-sm inline-block">Trực Quan Sinh Động</span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold font-heading text-stone-900 leading-tight">
+                Thi Công Công Trình Thực Tế
+            </h1>
+            <p class="text-xs sm:text-sm text-stone-500 font-medium max-w-xl mx-auto uppercase tracking-wide leading-relaxed">
+                Xem lại những dự án thực tế do Nội Thất Bảo Khang tư vấn thiết kế và trực tiếp lắp đặt cho khách hàng.
+            </p>
+            <div class="w-20 h-1 bg-amber-800 mx-auto rounded-full mt-2"></div>
+        </div>
+
+        {% if videos %}
+            <!-- Videos Grid (Liquid Glass style) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for video in videos %}
+                    <div class="glass-panel bg-white/70 border border-white/40 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between">
+                        
+                        <!-- Video Media Box -->
+                        <div class="relative w-full aspect-video bg-stone-950 overflow-hidden group">
+                            <!-- Background Video Element -->
+                            <video id="video-{{ video.id }}" src="/{{ video.video_path }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" preload="metadata"></video>
+                            
+                            <!-- Liquid Play Overlay -->
+                            <div class="absolute inset-0 bg-black/35 flex items-center justify-center opacity-100 group-hover:bg-black/45 transition-all cursor-pointer" onclick="playInLightbox('/{{ video.video_path }}', '{{ video.video_name }}')">
+                                <span class="w-14 h-14 rounded-full bg-white/25 hover:bg-white/35 border border-white/50 flex items-center justify-center backdrop-blur-md transition-all transform group-hover:scale-110 shadow-xl text-white">
+                                    <i class="fa-solid fa-play text-lg ml-1"></i>
+                                </span>
+                            </div>
+                            
+                            <!-- Resize Expand Button -->
+                            <button class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-black/45 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition-all" title="Phóng to" onclick="playInLightbox('/{{ video.video_path }}', '{{ video.video_name }}')">
+                                <i class="fa-solid fa-expand text-2xs"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Metadata Card Details -->
+                        <div class="p-5 flex-grow flex flex-col justify-between">
+                            <h3 class="font-bold text-stone-900 text-sm leading-snug line-clamp-2 mb-3 text-left">
+                                {{ video.video_name }}
+                            </h3>
+                            <div class="flex items-center justify-between text-4xs font-bold text-stone-400 uppercase tracking-widest pt-2 border-t border-stone-200/40">
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-play text-3xs text-amber-700"></i> MP4 Video
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Smart Pagination (Ellipsis pagination) -->
+            {% if total_pages > 1 %}
+                <div class="flex items-center justify-center gap-2.5 mt-14 py-4">
+                    {% if page > 1 %}
+                        <a href="{{ url_for('construction_videos', page=page-1) }}" class="w-10 h-10 rounded-xl bg-white/70 hover:bg-white border border-stone-200/50 text-stone-700 flex items-center justify-center transition-all shadow-sm hover:shadow active:scale-95" title="Trang trước">
+                            <i class="fa-solid fa-angle-left text-xs"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for p in pages %}
+                        {% if p == '...' %}
+                            <span class="w-10 h-10 flex items-center justify-center text-stone-400 font-bold">...</span>
+                        {% else %}
+                            {% if p == page %}
+                                <span class="w-10 h-10 rounded-xl bg-amber-800 text-white font-extrabold flex items-center justify-center shadow-md select-none border border-amber-800 text-xs">
+                                    {{ p }}
+                                </span>
+                            {% else %}
+                                <a href="{{ url_for('construction_videos', page=p) }}" class="w-10 h-10 rounded-xl bg-white/70 hover:bg-white border border-stone-200/50 text-stone-700 font-bold flex items-center justify-center transition-all shadow-sm hover:shadow active:scale-95 text-xs">
+                                    {{ p }}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page < total_pages %}
+                        <a href="{{ url_for('construction_videos', page=page+1) }}" class="w-10 h-10 rounded-xl bg-white/70 hover:bg-white border border-stone-200/50 text-stone-700 flex items-center justify-center transition-all shadow-sm hover:shadow active:scale-95" title="Trang sau">
+                            <i class="fa-solid fa-angle-right text-xs"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="glass-panel bg-white/60 rounded-3xl p-12 text-center max-w-lg mx-auto border border-white/30 shadow-lg">
+                <div class="w-16 h-16 rounded-full bg-amber-800/10 text-amber-800 flex items-center justify-center mx-auto text-xl border border-amber-800/20 mb-4">
+                    <i class="fa-solid fa-circle-play"></i>
+                </div>
+                <h3 class="font-bold text-stone-900 text-base uppercase tracking-wider">Chưa Có Video Nào</h3>
+                <p class="text-xs text-stone-500 mt-2">Dữ liệu các video thi công thực tế đang được đồng bộ hóa. Vui lòng quay lại sau.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Fullscreen Video Lightbox Modal -->
+<div id="video-lightbox" class="fixed inset-0 z-[3000] bg-black/90 backdrop-blur-md hidden flex-col items-center justify-center p-4">
+    <div class="relative w-full max-w-4xl bg-stone-950 rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-fade-in">
+        <!-- Close Button -->
+        <button id="video-lightbox-close" class="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-black/50 hover:bg-black/85 text-white flex items-center justify-center text-xl font-bold transition-all shadow-md">&times;</button>
+        
+        <!-- Video Player Body -->
+        <div class="aspect-video w-full bg-stone-950 flex items-center justify-center">
+            <video id="video-lightbox-player" class="w-full h-full object-contain" controls autoplay></video>
+        </div>
+        
+        <!-- Footer Description -->
+        <div class="p-5 bg-stone-900 border-t border-white/5 text-left">
+            <h4 id="video-lightbox-title" class="font-bold text-white text-sm">...</h4>
+        </div>
+    </div>
+</div>
+
+<script>
+    function playInLightbox(path, name) {
+        const lightbox = document.getElementById('video-lightbox');
+        const player = document.getElementById('video-lightbox-player');
+        const title = document.getElementById('video-lightbox-title');
+        
+        player.src = path;
+        title.textContent = name;
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+        player.play();
+    }
+    
+    document.getElementById('video-lightbox-close').addEventListener('click', () => {
+        const lightbox = document.getElementById('video-lightbox');
+        const player = document.getElementById('video-lightbox-player');
+        player.pause();
+        player.src = "";
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+    });
+
+    // Close lightbox when clicking outside the content box
+    document.getElementById('video-lightbox').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('video-lightbox')) {
+            document.getElementById('video-lightbox-close').click();
+        }
+    });
+</script>
+{% endblock %}

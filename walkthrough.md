@@ -1,6 +1,9 @@
-# Báo cáo Triển khai: Đính kèm Hình ảnh vào Live Chat & Rút gọn Phân trang
+# Báo cáo Triển khai: Đính kèm Hình ảnh, Xóa Hội Thoại & Video Công Trình Thực Tế
 
-Hệ thống **Nội Thất Bảo Khang** đã hoàn thành đợt nâng cấp toàn diện về tính năng **Live Chat Trực Tuyến**, cho phép cả Khách hàng và Admin gửi nhận hình ảnh trực tiếp trong cuộc hội thoại.
+Hệ thống **Nội Thất Bảo Khang** đã hoàn thành đợt nâng cấp toàn diện bao gồm:
+1. **Live Chat Hình Ảnh**: Gửi/nhận ảnh trực quan, phóng to Lightbox.
+2. **Quản Lý Đoạn Chat**: Xóa lịch sử chat phía Khách hàng (Trò chuyện mới) và phía Admin (Xóa cuộc hội thoại).
+3. **Mục Video Công Trình Thực Tế**: Tự động quét, hiển thị danh sách video, phân trang tối đa 10 video và phát video bằng Lightbox.
 
 ---
 
@@ -26,9 +29,29 @@ Hệ thống **Nội Thất Bảo Khang** đã hoàn thành đợt nâng cấp t
   - Cập nhật danh sách bên trái để hiển thị biểu tượng `📷 [Hình ảnh]` thay vì chuỗi rỗng khi khách hàng gửi ảnh cuối cùng.
   - Tích hợp Lightbox modal xem ảnh gốc tương tự phía client.
 
-### 2. Phân trang rút gọn thông minh (Smart Pagination)
-- **Thuật toán Backend**: Thêm hàm logic `make_pagination` giới hạn số lượng nút phân trang.
-- **Giao diện**: Hiển thị dấu ba chấm `...` thay thế cho dãy số quá dài để tránh vỡ khung giao diện, ví dụ: `1 2 3 4 ... 44` hoặc `1 ... 9 10 11 ... 44`.
+### 2. Tính năng Xóa Hội Thoại (Chat Management)
+- **Cổng API Backend `/api/chat/delete`**:
+  - Nhận yêu cầu `DELETE` hoặc `POST` chứa `session_id`.
+  - Thực hiện truy vấn xóa toàn bộ các bản ghi tin nhắn tương ứng với `session_id` đó trong bảng `chat_messages`.
+  - Đồng thời tự động quét và xóa sạch các file ảnh vật lý tương ứng trong thư mục `uploads/chat/` của phiên chat đó để tránh lãng phí dung lượng lưu trữ trên ổ đĩa.
+  - Xóa bỏ các biến phiên làm việc (`chat_session_id`, `chat_customer_name`, `chat_customer_phone`) trong `session` của Flask nếu là khách tự xóa.
+- **Giao diện Admin (`admin_chat.html`)**:
+  - Tích hợp biểu tượng Thùng rác 🗑️ bên phải mỗi cuộc hội thoại trong danh sách khách hàng.
+  - Khi click: Hiển thị hộp thoại xác nhận. Nếu đồng ý sẽ gọi API `/api/chat/delete`, xóa phiên đang active (nếu trùng) và tải lại danh sách hội thoại ngay lập tức.
+- **Giao diện Khách hàng (`base.html` - Live Chat Widget)**:
+  - Thêm nút biểu tượng Thùng rác 🗑️ trên Header của hộp thoại chat khi cuộc trò chuyện đang diễn ra.
+  - Khách hàng bấm nút này để dọn dẹp lịch sử cũ, hệ thống xóa session local và bắt đầu cuộc trò chuyện mới từ đầu (hiện lại form điền Họ tên & SĐT).
+
+### 3. Mục "Video Công Trình Thực Tế"
+- **Định nghĩa bảng CSDL & Tự động quét seeding**:
+  - Tạo bảng `construction_videos` chứa `video_path`, `video_name` và `created_at`.
+  - Thiết lập cơ chế tự động quét thư mục `data/thicongthucte/` khi ứng dụng khởi chạy. Mọi file `.mp4`, `.webm` mới thêm vào thư mục này sẽ được tự động đồng bộ hóa vào database.
+- **Trang hiển thị `templates/construction_videos.html`**:
+  - Định tuyến tại `/cong-trinh-thuc-te`.
+  - Thiết kế Liquid Glass / Apple Style sang trọng: Thẻ video kính mờ bo tròn góc rộng, hiệu ứng hover chuyển động mượt mà.
+  - Tích hợp xem trực tiếp tại chỗ bằng HTML5 Video Player hoặc click nút phóng to để mở Trình xem Video Lightbox Modal khổ lớn mờ nền ấn tượng.
+- **Quy tắc phân trang**:
+  - Phân trang hiển thị chính xác tối đa **10 video trên một trang**, hỗ trợ thanh điều hướng thông minh rút gọn dạng dấu ba chấm `...` cực đẹp.
 
 ---
 
@@ -38,11 +61,10 @@ Hệ thống **Nội Thất Bảo Khang** đã hoàn thành đợt nâng cấp t
    ```bash
    python3 server.py
    ```
-2. **Kiểm tra Live Chat phía Khách hàng**:
-   - Truy cập trang chủ `http://localhost:8000`.
-   - Bấm vào widget Live Chat góc dưới bên phải, nhập thông tin liên hệ để mở chat.
-   - Thử click nút camera để chọn ảnh gửi lên, hoặc kéo thả ảnh từ màn hình vào khung chat, hoặc chụp màn hình rồi bấm Ctrl+V vào ô chat để gửi.
-3. **Kiểm tra Live Chat phía Admin**:
-   - Truy cập Bảng quản trị tại `http://localhost:8000/admin/chat` (Tài khoản mặc định: `admin` / mật khẩu `admin123`).
-   - Nhấn vào phiên chat của khách hàng tương ứng. Bạn sẽ thấy ảnh khách hàng gửi xuất hiện.
-   - Admin tiến hành đính kèm gửi lại ảnh hoặc xem ảnh bằng Lightbox.
+2. **Kiểm thử Xóa Chat**:
+   - Gửi tin nhắn và ảnh từ phía khách hàng và admin.
+   - Phía admin: Bấm biểu tượng 🗑️ bên phải danh sách khách để xóa.
+   - Phía khách hàng: Bấm biểu tượng 🗑️ trên header khung chat để xóa lịch sử và bắt đầu hội thoại mới.
+3. **Kiểm thử Trang Video**:
+   - Truy cập `http://localhost:8000/cong-trinh-thuc-te` hoặc bấm liên kết **Thực Tế** trên Menu.
+   - Trải nghiệm xem video trực tiếp hoặc mở phóng to Lightbox.

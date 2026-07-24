@@ -225,13 +225,48 @@
                                 ${c.sender_type === 'admin' ? '<span class="text-red-750 font-bold">Bạn:</span> ' : ''}${escapeHTML(msgSnippet)}
                             </p>
                         </div>
-                        ${c.unread_count > 0 ? `
-                            <span class="flex-shrink-0 bg-red-800 text-white font-extrabold text-[9px] w-5 h-5 flex items-center justify-center rounded-full shadow">
-                                ${c.unread_count}
-                            </span>
-                        ` : ''}
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            ${c.unread_count > 0 ? `
+                                <span class="bg-red-800 text-white font-extrabold text-[9px] w-5 h-5 flex items-center justify-center rounded-full shadow">
+                                    ${c.unread_count}
+                                </span>
+                            ` : ''}
+                            <button class="delete-conv-btn text-stone-450 hover:text-red-650 p-1.5 rounded-lg hover:bg-stone-200/50 transition-colors" title="Xóa cuộc trò chuyện">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
                     `;
                     
+                    const delBtn = item.querySelector('.delete-conv-btn');
+                    delBtn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        if (!confirm(`Bạn có chắc chắn muốn xóa toàn bộ lịch sử chat của khách hàng "${name}"?`)) return;
+                        
+                        try {
+                            const res = await fetch('/api/chat/delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ session_id: c.session_id })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                if (activeSessionId === c.session_id) {
+                                    activeSessionId = null;
+                                    activeCustomerName = null;
+                                    chatPlaceholder.classList.remove('hidden');
+                                    chatMain.classList.add('hidden');
+                                    if (pollInterval) clearInterval(pollInterval);
+                                }
+                                loadConversations();
+                            } else {
+                                alert(data.message || 'Không thể xóa hội thoại');
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert('Lỗi kết nối mạng.');
+                        }
+                    });
+
                     item.addEventListener('click', () => selectConversation(c.session_id, name));
                     convsList.appendChild(item);
                 });

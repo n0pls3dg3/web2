@@ -243,6 +243,19 @@ def init_database():
         END
         """)
 
+        # ConstructionVideos table
+        cursor.execute("""
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[construction_videos]') AND type in (N'U'))
+        BEGIN
+            CREATE TABLE [dbo].[construction_videos] (
+                [id] INT IDENTITY(1,1) PRIMARY KEY,
+                [video_path] NVARCHAR(255) NOT NULL UNIQUE,
+                [video_name] NVARCHAR(255) NOT NULL,
+                [created_at] DATETIME DEFAULT GETDATE()
+            )
+        END
+        """)
+
         # Create default Admin if not exists
         cursor.execute("SELECT id FROM Users WHERE username = %s", ('admin',))
         if not cursor.fetchone():
@@ -1378,6 +1391,102 @@ def chat_get_conversations():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/api/chat/delete', methods=['POST', 'DELETE'])
+def chat_delete_conversation():
+    session_id = None
+    if request.is_json:
+        data = request.json or {}
+        session_id = data.get('session_id')
+    else:
+        session_id = request.form.get('session_id')
+        
+    is_admin_request = 'user_id' in session and session.get('is_admin')
+    
+    if not session_id:
+        chat_sess = get_current_chat_session()
+        if chat_sess:
+            session_id = chat_sess['session_id']
+            
+    if not session_id:
+        return jsonify({'success': False, 'message': 'Không tìm thấy phiên chat để xóa'}), 400
+        
+    if not is_admin_request:
+        chat_sess = get_current_chat_session()
+        if not chat_sess or chat_sess['session_id'] != session_id:
+            return jsonify({'success': False, 'message': 'Không có quyền xóa phiên chat này'}), 403
+            
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(as_dict=True)
+        
+        # Get list of images to delete from filesystem
+        cursor.execute("SELECT image_url FROM chat_messages WHERE session_id = %s AND message_type = 'image'", (session_id,))
+        rows = cursor.fetchall()
+        
+        # Delete from DB
+        cursor.execute("DELETE FROM chat_messages WHERE session_id = %s", (session_id,))
+        conn.close()
+        
+        # Remove physical files
+        import os
+        for row in rows:
+            img_url = row['image_url']
+            if img_url and img_url.startswith('/uploads/'):
+                local_path = img_url.lstrip('/')
+                if os.path.exists(local_path):
+                    try:
+                        os.remove(local_path)
+                    except Exception as ef:
+                        print(f"Error removing chat file {local_path}: {ef}", file=sys.stderr)
+                        
+        # If client request, pop local session details
+        if not is_admin_request:
+            session.pop('chat_session_id', None)
+            session.pop('chat_customer_name', None)
+            session.pop('chat_customer_phone', None)
+            
+        return jsonify({'success': True, 'message': 'Đã xóa hội thoại thành công'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/cong-trinh-thuc-te')
+def construction_videos():
+    page = request.args.get('page', 1, type=int)
+    if page < 1: page = 1
+    limit = 12
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(as_dict=True)
+        
+        cursor.execute("SELECT COUNT(*) as cnt FROM construction_videos")
+        total_rows = cursor.fetchone()['cnt']
+        
+        import math
+        total_pages = int(math.ceil(total_rows / limit))
+        if total_pages < 1: total_pages = 1
+        if page > total_pages: page = total_pages
+        offset = (page - 1) * limit
+        
+        cursor.execute(f"""
+            SELECT id, video_path, video_name, CONVERT(VARCHAR(19), created_at, 120) as created_at 
+            FROM construction_videos 
+            ORDER BY id DESC
+            OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY
+        """)
+        videos = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        print(f"Error loading construction videos: {e}", file=sys.stderr)
+        videos = []
+        total_rows = 0
+        total_pages = 1
+        
+    pages = make_pagination(page, total_pages)
+    return render_template('construction_videos.html', videos=videos, page=page, 
+                           total_pages=total_pages, pages=pages, total_rows=total_rows)
+
+
 @app.route('/admin/chat')
 def admin_chat():
     if not check_admin_auth(): return redirect(url_for('login'))
@@ -1401,11 +1510,44 @@ def serve_uploads(filename):
     return send_from_directory('uploads', filename)
 
 
+def run_video_sync():
+    print("Running automated scanning of construction videos...")
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Scan filesystem
+        import os
+        video_dir = 'data/thicongthucte'
+        if os.path.exists(video_dir):
+            video_files = os.listdir(video_dir)
+            video_count = 0
+            for f in video_files:
+                if f.lower().endswith(('.mp4', '.webm')):
+                    rel_path = f"data/thicongthucte/{f}"
+                    cursor.execute("SELECT COUNT(*) FROM construction_videos WHERE video_path = %s", (rel_path,))
+                    exists = cursor.fetchone()[0]
+                    if not exists:
+                        name_clean = f.rsplit('.', 1)[0]
+                        friendly_name = f"Video Công Trình - {name_clean[:8].upper()}"
+                        cursor.execute("INSERT INTO construction_videos (video_path, video_name) VALUES (%s, %s)", (rel_path, friendly_name))
+                        video_count += 1
+            if video_count > 0:
+                print(f"Synchronized {video_count} new construction videos from filesystem.")
+            else:
+                print("Construction videos synchronized. No new videos found.")
+        conn.close()
+    except Exception as e:
+        print(f"Error scanning construction videos: {e}", file=sys.stderr)
+
+
 if __name__ == '__main__':
     # Initialize DB schemas on startup
     init_database()
     # Import seeding directories if DB empty
     run_import_seeding()
+    # Sync construction videos
+    run_video_sync()
     
     print("Starting Noi That Bao Khang Flask server...")
     app.run(host='0.0.0.0', port=8000, debug=True)
