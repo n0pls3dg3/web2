@@ -9,8 +9,8 @@ from email.header import Header
 # SMTP Configuration
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USER = "noithatbaokhang@gmail.com"
-SMTP_PASS = "your_app_password_here"  # User replaces this with an app password
+SMTP_USER = "daibt506@gmail.com"
+SMTP_PASS = "yrkb ztzz nlwy vclh"
 
 EMAIL_RECEIVER = "noithatbaokhang@gmail.com"
 HOTLINE_DISPLAY = "0903 979 525"
@@ -137,15 +137,22 @@ def send_order_notification_email(order_details, items):
 
         msg.attach(MIMEText(html_content, 'html', 'utf-8'))
 
-        # Connect to SMTP Server
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.sendmail(SMTP_USER, to_email, msg.as_string())
-        server.quit()
+        def send_thread():
+            try:
+                server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASS)
+                server.sendmail(SMTP_USER, EMAIL_RECEIVER, msg.as_string())
+                server.quit()
+                print(f"Successfully sent order email: #{order_details['id']}", flush=True)
+            except Exception as e:
+                import sys
+                print(f"Failed to send order email: {e}", file=sys.stderr, flush=True)
+                
+        import threading
+        threading.Thread(target=send_thread).start()
         return True
     except Exception as e:
-        # Non-blocking log, fallback safely
         import sys
-        print(f"Failed to send email: {e}. (SMTP is not configured)", file=sys.stderr)
+        print(f"Failed to build order email: {e}", file=sys.stderr, flush=True)
         return False

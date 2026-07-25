@@ -21,6 +21,44 @@ DB_USER = "sa"
 DB_PASS = "ntBK01011227"
 DB_NAME = "noithatbaokhang_db"
 
+# SMTP Configuration for Email Notifications
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SMTP_USER = "daibt506@gmail.com"
+SMTP_PASSWORD = "yrkb ztzz nlwy vclh"
+NOTIFICATION_RECEIVER = "noithatbaokhang@gmail.com"
+
+import threading
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_notification_email_async(subject, html_content):
+    def email_thread():
+        if not SMTP_USER or not SMTP_PASSWORD:
+            return
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = f"Nội Thất Bảo Khang <{SMTP_USER}>"
+            msg['To'] = NOTIFICATION_RECEIVER
+            msg['Subject'] = subject
+            msg.attach(MIMEText(html_content, 'html', 'utf-8'))
+            
+            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_USER, NOTIFICATION_RECEIVER, msg.as_string())
+            server.close()
+        except Exception as e:
+            import sys
+            print(f"Failed to send notification email: {e}", file=sys.stderr, flush=True)
+            
+    threading.Thread(target=email_thread).start()
+
+# Active admin chat session tracking
+import time
+admin_active_sessions = {}
+
 # Brand constants
 BRAND_NAME = "Nội Thất Bảo Khang"
 HOTLINE = "0903979525"
@@ -1219,6 +1257,9 @@ def chat_get_messages():
         if 'user_id' not in session or not session.get('is_admin'):
             return jsonify({'success': False, 'message': 'Không có quyền truy cập'}), 403
             
+        # Update last active time of admin for this session
+        admin_active_sessions[session_id] = time.time()
+            
         try:
             conn = get_db_connection()
             cursor = conn.cursor(as_dict=True)
@@ -1283,7 +1324,6 @@ def chat_send_message():
     if file and file.filename != '':
         import os
         import uuid
-        import time
         
         allowed_extensions = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
         ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
@@ -1336,6 +1376,45 @@ def chat_send_message():
         try:
             conn = get_db_connection()
             cursor = conn.cursor(as_dict=True)
+            
+            # Check if admin is currently active in this specific chat screen
+            last_active = admin_active_sessions.get(chat_sess['session_id'], 0)
+            is_admin_in_screen = (time.time() - last_active) < 5.0
+            
+            if not is_admin_in_screen:
+                # Send email notification to Admin
+                chat_url = "https://noithatgiadinhbaokhang.com/admin/chat"
+                subject = f"[Nội Thất Bảo Khang] Tin Nhắn Chat Mới Từ Khách Hàng - {chat_sess['name']}"
+                html_body = f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 12px; background-color: #fafafa; border-top: 4px solid #991b1b;">
+                        <h2 style="color: #991b1b; padding-bottom: 10px; margin-top: 0; border-bottom: 1px solid #eee;">Tin Nhắn Chat Mới Chưa Đọc</h2>
+                        <p>Chào Ban Quản trị, khách hàng vừa gửi tin nhắn mới và đang đợi bạn phản hồi trực tuyến.</p>
+                        <table style="width: 100%; margin: 15px 0; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold; width: 120px; color: #555;">Khách hàng:</td>
+                                <td style="padding: 8px 0; font-weight: bold; color: #111;">{chat_sess['name']}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold; color: #555;">Số điện thoại:</td>
+                                <td style="padding: 8px 0; color: #111;">{chat_sess.get('phone', 'Chưa cung cấp')}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold; color: #555; vertical-align: top;">Tin nhắn:</td>
+                                <td style="padding: 8px 0; font-style: italic; color: #333; background-color: #f0f0f0; border-radius: 8px; padding-left: 10px; padding-right: 10px;">"{message_text}"</td>
+                            </tr>
+                        </table>
+                        <p style="margin-top: 25px; font-size: 13px;">Vui lòng click vào nút bên dưới để mở giao diện phản hồi khách hàng:</p>
+                        <div style="text-align: center; margin: 25px 0;">
+                            <a href="{chat_url}" style="display: inline-block; padding: 12px 30px; background-color: #991b1b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; text-transform: uppercase; font-size: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Mở Giao Diện Phản Hồi</a>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                send_notification_email_async(subject, html_body)
+
             cursor.execute("""
                 INSERT INTO chat_messages (session_id, sender_type, sender_name, message, is_read, message_type, image_url) 
                 VALUES (%s, 'customer', %s, %s, 0, %s, %s)
