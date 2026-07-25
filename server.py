@@ -1290,10 +1290,10 @@ def chat_send_message():
         if ext not in allowed_extensions:
             return jsonify({'success': False, 'message': 'Định dạng file không hỗ trợ. Chỉ cho phép PNG, JPG, JPEG, WEBP, GIF.'}), 400
             
-        os.makedirs('uploads/chat', exist_ok=True)
+        os.makedirs('data/uploads/chat', exist_ok=True)
         
         new_filename = f"{uuid.uuid4().hex}_{int(time.time())}.{ext}"
-        save_path = os.path.join('uploads/chat', new_filename)
+        save_path = os.path.join('data/uploads/chat', new_filename)
         file.save(save_path)
         
         image_url = f"/uploads/chat/{new_filename}"
@@ -1434,7 +1434,7 @@ def chat_delete_conversation():
         for row in rows:
             img_url = row['image_url']
             if img_url and img_url.startswith('/uploads/'):
-                local_path = img_url.lstrip('/')
+                local_path = img_url.replace('/uploads/', 'data/uploads/').lstrip('/')
                 if os.path.exists(local_path):
                     try:
                         os.remove(local_path)
