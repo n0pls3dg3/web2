@@ -495,6 +495,8 @@ def inject_cart_count():
 def index():
     sale_products = []
     latest_products = []
+    featured_products = []
+    featured_category_groups = []
     try:
         conn = get_db_connection()
         cursor = conn.cursor(as_dict=True)
@@ -517,11 +519,47 @@ def index():
             ORDER BY p.id DESC
         """)
         latest_products = cursor.fetchall()[:8]
+
+        # Build the synchronized homepage strip from product-bearing leaf categories.
+        # The leaf fallback keeps older production databases visible when parent_id
+        # was not populated during their original import.
+        cursor.execute("""
+            SELECT c.id, c.name, c.slug
+            FROM Categories c
+            WHERE EXISTS (SELECT 1 FROM Products p WHERE p.category_id = c.id)
+              AND NOT EXISTS (
+                  SELECT 1 FROM Categories child WHERE child.parent_id = c.id
+              )
+            ORDER BY COALESCE(c.parent_id, c.id), c.id
+        """)
+        leaf_categories = cursor.fetchall()
+        for category in leaf_categories:
+            category_products = []
+            cursor.execute("""
+                SELECT TOP 3 p.*, c.name as category_name, c.slug as category_slug,
+                       (SELECT TOP 1 image_path FROM ProductImages WHERE product_id = p.id) as image_path
+                FROM Products p
+                INNER JOIN Categories c ON p.category_id = c.id
+                WHERE p.category_id = %s
+                ORDER BY p.id DESC
+            """, (category['id'],))
+            for product in cursor.fetchall():
+                product['featured_category_name'] = category['name']
+                product['featured_category_slug'] = category['slug']
+                featured_products.append(product)
+                category_products.append(product)
+            if category_products:
+                featured_category_groups.append({
+                    'name': category['name'],
+                    'slug': category['slug'],
+                    'products': category_products
+                })
         conn.close()
     except Exception as e:
         print(f"Error fetching home prods: {e}", file=sys.stderr)
         
-    return render_template('index.html', sale_products=sale_products, latest_products=latest_products)
+    return render_template('index.html', sale_products=sale_products, latest_products=latest_products,
+                           featured_products=featured_products, featured_category_groups=featured_category_groups)
 
 def make_pagination(current_page, total_pages):
     pages = []

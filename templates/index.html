@@ -30,6 +30,143 @@
     </div>
 </section>
 
+{% if featured_products %}
+<!-- Synchronized Category and Product Strip -->
+<section id="featured-sync-carousel" class="featured-strip-section bg-white border-b border-stone-200 py-6" aria-label="Sản phẩm nổi bật theo danh mục">
+    <div class="max-w-7xl mx-auto">
+        <div class="featured-strip-viewport featured-category-viewport no-scrollbar">
+            <div class="featured-strip-track">
+                {% for copy in range(2) %}
+                    {% for group in featured_category_groups %}
+                        <a href="{{ url_for('category', slug=group.slug) }}" class="featured-category-item" style="--featured-count: {{ group.products|length }}" aria-label="Xem danh mục {{ group.name }}">
+                            <span>{{ group.name }}</span>
+                        </a>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="featured-strip-viewport no-scrollbar mt-2">
+            <div class="featured-strip-track">
+                {% for copy in range(2) %}
+                    {% for prod in featured_products %}
+                        <a href="{{ url_for('detail', product_id=prod.id) }}" class="featured-product-item group">
+                            <div class="featured-product-image">
+                                {% if prod.image_path %}
+                                    <img src="/{{ prod.image_path }}" alt="{{ prod.name }}" loading="lazy">
+                                {% else %}
+                                    <i class="fa-regular fa-image text-stone-300 text-2xl"></i>
+                                {% endif %}
+                            </div>
+                            <div class="px-3 py-2.5">
+                                <span class="block text-[10px] font-bold uppercase tracking-wider text-red-700 truncate">{{ prod.featured_category_name }}</span>
+                                <span class="block mt-1 text-xs font-bold text-stone-800 line-clamp-2">{{ prod.name }}</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% block scripts %}
+<script>
+    (() => {
+        const carousel = document.getElementById('featured-sync-carousel');
+        if (!carousel) return;
+
+        const viewports = [...carousel.querySelectorAll('.featured-strip-viewport')];
+        const tracks = viewports.map((viewport) => viewport.querySelector('.featured-strip-track'));
+        let offset = 0;
+        let loopWidth = 0;
+        let lastTime = 0;
+        let animationFrame;
+        let dragging = false;
+        let pointerId = null;
+        let startX = 0;
+        let startOffset = 0;
+        let didDrag = false;
+
+        const measure = () => {
+            loopWidth = tracks[0].scrollWidth / 2;
+            if (!loopWidth) return;
+            offset = Math.min(offset, 0);
+            while (offset >= 0) offset -= loopWidth;
+            while (offset < -loopWidth) offset += loopWidth;
+        };
+
+        const render = () => {
+            tracks.forEach((track) => {
+                track.style.transform = `translate3d(${offset}px, 0, 0)`;
+            });
+        };
+
+        const animate = (time) => {
+            if (!lastTime) lastTime = time;
+            if (!dragging && loopWidth) {
+                offset += (time - lastTime) * 0.018;
+                if (offset >= 0) offset -= loopWidth;
+                render();
+            }
+            lastTime = time;
+            animationFrame = requestAnimationFrame(animate);
+        };
+
+        const stopDragging = (event) => {
+            if (!dragging || (pointerId !== null && event.pointerId !== pointerId)) return;
+            dragging = false;
+            carousel.classList.remove('is-dragging');
+            pointerId = null;
+            lastTime = performance.now();
+        };
+
+        viewports.forEach((viewport) => {
+            viewport.addEventListener('pointerdown', (event) => {
+                dragging = true;
+                didDrag = false;
+                pointerId = event.pointerId;
+                startX = event.clientX;
+                startOffset = offset;
+                carousel.classList.add('is-dragging');
+                viewport.setPointerCapture(event.pointerId);
+            });
+
+            viewport.addEventListener('pointermove', (event) => {
+                if (!dragging || event.pointerId !== pointerId) return;
+                const distance = event.clientX - startX;
+                if (Math.abs(distance) > 4) didDrag = true;
+                offset = startOffset + distance;
+                while (offset >= 0) offset -= loopWidth;
+                while (offset < -loopWidth) offset += loopWidth;
+                render();
+            });
+
+            viewport.addEventListener('pointerup', stopDragging);
+            viewport.addEventListener('pointercancel', stopDragging);
+        });
+
+        carousel.addEventListener('click', (event) => {
+            if (didDrag) {
+                event.preventDefault();
+                event.stopPropagation();
+                didDrag = false;
+            }
+        }, true);
+
+        window.addEventListener('resize', () => {
+            measure();
+            render();
+        });
+
+        measure();
+        render();
+        animationFrame = requestAnimationFrame(animate);
+    })();
+</script>
+{% endblock %}
+
 <!-- Brand Benefits -->
 <section class="bg-white border-b border-stone-200 py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
